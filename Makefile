@@ -17,13 +17,10 @@ SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 BIN = bin
 
-$(BIN):
-	mkdir -p $@
-
 all: $(OUT)
 
 $(OUT): $(OBJ) | $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o bin/game $(INCFLAGS)
+	$(CC) $(CFLAGS) $^ -o bin/out $(INCFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@ $(INCFLAGS)
