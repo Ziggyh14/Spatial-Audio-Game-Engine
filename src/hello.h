@@ -5,5 +5,8 @@ SDL_Window* init_Window(const char* title, int width, int height);
 
 void close_Window(SDL_Window* window);
 
+Mix_Chunk* play_Sample(const char* file);
+
+
 
 

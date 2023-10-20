@@ -23,6 +23,12 @@ void close_Window(SDL_Window* window){
     SDL_Quit();
 }
 
+Mix_Chunk* play_Sample(const char* file){
+    Mix_Chunk* temp = Mix_LoadWAV(file);
+    Mix_PlayChannel(-1 ,temp,0);
+    return temp;
+}
+
 
 int main(int argc, char** argv){
 
@@ -34,9 +40,8 @@ int main(int argc, char** argv){
         MIX_DEFAULT_FREQUENCY,
         MIX_DEFAULT_FORMAT,
         2,4096);
-    c = Mix_LoadWAV("bin/bassloop.wav");
-    Mix_AllocateChannels(1);
     //printf("%d\n", Mix_Volume(-1,MIX_MAX_VOLUME));
+    c = play_Sample("bin/bassloop.wav");
 
     SDL_Event e;
     int quit = 0;
@@ -46,7 +51,7 @@ int main(int argc, char** argv){
                 quit = 1;
             }
             if(e.type == SDL_KEYDOWN){
-                Mix_PlayChannel(0 ,c,0);
+                
 
             }
         }
