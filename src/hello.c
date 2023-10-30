@@ -1,5 +1,5 @@
 #include "hello.h"
-
+#include "sample_hash_table.h"
 
 SDL_Window* init_Window (const char* title, int width, int height){
 
@@ -31,7 +31,7 @@ Mix_Chunk* play_Sample(const char* file){
 
 
 int main(int argc, char** argv){
-
+    /*
     Mix_Chunk* c;
     SDL_Window* window = init_Window("DEMO", 1280,720);
     
@@ -60,4 +60,34 @@ int main(int argc, char** argv){
     Mix_CloseAudio();
     close_Window(window);
     return 0;
+    */
+    int i;
+    Table* ht = create_Table();
+    if (ht == NULL){
+        printf("ERROR: NO TABLE MADE");
+        return 1;
+    }
+    for(i = 0;i<1000;i++){
+        char* s = malloc(sizeof(char)*25);
+        sprintf(s,"bin/bassloop%d.wav",i);
+        hash_lookup(s,ht);
+    }
+
+    printf("\n TABLE, CAPACITY = %d\n",ht->capacity);
+    for(i=0;i<TABLE_CAPACITY;i++){
+        if(ht->entries[i] == NULL){
+            printf("%d:-----\n",i);
+        }else{
+            printf("%d: ",i);
+            Entry* e = ht->entries[i];
+            printf("%s, ",e->file);
+            while(e->next != NULL){
+                e=e->next;
+                printf("%s, ",e->file);
+            }
+            printf("\n");
+        }
+    }
+    printf("size of table %ld \nsize of entries %ld\n",sizeof(Entry*)*TABLE_CAPACITY,sizeof(Entry)*TABLE_CAPACITY);
+   
 }

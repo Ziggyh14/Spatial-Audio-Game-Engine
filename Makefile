@@ -12,7 +12,7 @@ CFLAGS += -Wextra -Wpedantic \
 LIBD = lib
 SDLLIBD = $(LIBD)/SDL
 INCFLAGS = -lSDL2 -lSDL2_mixer
-OUT = $(BIN)/game
+OUT = $(BIN)/out
 SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 BIN = bin
