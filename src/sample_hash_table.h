@@ -5,7 +5,7 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#define TABLE_CAPACITY 500
+#define TABLE_CAPACITY 50
 
 #endif
 //Test for a hash table for allocated samples
@@ -25,8 +25,11 @@ typedef struct Table {
 } Table;
 
 
-
 Table* create_Table(void);
+
+void delete_Table(Table* t);
+
+void free_Entry(Entry* e);
 
 /*
 Hashes filename and returns pointer to entry in hash table

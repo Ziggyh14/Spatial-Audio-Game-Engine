@@ -31,48 +31,18 @@ Mix_Chunk* play_Sample(const char* file){
 
 
 int main(int argc, char** argv){
-    /*
-    Mix_Chunk* c;
-    SDL_Window* window = init_Window("DEMO", 1280,720);
-    
-    //Mixer test
-    Mix_OpenAudio(
-        MIX_DEFAULT_FREQUENCY,
-        MIX_DEFAULT_FORMAT,
-        2,4096);
-    //printf("%d\n", Mix_Volume(-1,MIX_MAX_VOLUME));
-    c = play_Sample("bin/bassloop.wav");
-
-    SDL_Event e;
-    int quit = 0;
-    while(!quit){
-        while(SDL_PollEvent(&e)){
-            if(e.type == SDL_QUIT){
-                quit = 1;
-            }
-            if(e.type == SDL_KEYDOWN){
-                
-
-            }
-        }
-    }
-    Mix_FreeChunk(c);
-    Mix_CloseAudio();
-    close_Window(window);
-    return 0;
-    */
     int i;
     Table* ht = create_Table();
     if (ht == NULL){
-        printf("ERROR: NO TABLE MADE");
+        printf("ERROR: NO TABLE MADE\n");
         return 1;
     }
-    for(i = 0;i<1000;i++){
-        char* s = malloc(sizeof(char)*25);
-        sprintf(s,"bin/bassloop%d.wav",i);
-        hash_lookup(s,ht);
-    }
 
+    printf("%s",hash_lookup("hello.wav",ht)->file);
+    hash_lookup("hello",ht);
+    hash_lookup("yorpgorgr",ht);
+
+    //printf the hash table
     printf("\n TABLE, CAPACITY = %d\n",ht->capacity);
     for(i=0;i<TABLE_CAPACITY;i++){
         if(ht->entries[i] == NULL){
@@ -85,9 +55,9 @@ int main(int argc, char** argv){
                 e=e->next;
                 printf("%s, ",e->file);
             }
+            
             printf("\n");
         }
     }
-    printf("size of table %ld \nsize of entries %ld\n",sizeof(Entry*)*TABLE_CAPACITY,sizeof(Entry)*TABLE_CAPACITY);
-   
+    delete_Table(ht); //delete the table
 }
