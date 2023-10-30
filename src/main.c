@@ -1,5 +1,5 @@
 #include "sdl_func.h"
-#include "sample_hash_table.h"
+#include "sample_func.h"
 
 int main(int argc, char** argv){
     int i;
@@ -9,9 +9,18 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    printf("%s",hash_lookup("hello.wav",ht)->file);
-    hash_lookup("hello",ht);
-    hash_lookup("yorpgorgr",ht);
+    
+    
+    SDL_Window* window = init_Window("DEMO", 1280,720);
+    
+    //Mixer test
+    Mix_OpenAudio(
+        MIX_DEFAULT_FREQUENCY,
+        MIX_DEFAULT_FORMAT,
+        2,4096);
+    
+   
+    play_Sample("bin/bassloop.wav",0,ht);
 
     //printf the hash table
     printf("\n TABLE, CAPACITY = %d\n",ht->capacity);
@@ -30,5 +39,20 @@ int main(int argc, char** argv){
             printf("\n");
         }
     }
-    delete_Table(ht); //delete the table
+    SDL_Event e;
+    int quit = 0;
+    while(!quit){
+        while(SDL_PollEvent(&e)){
+            if(e.type == SDL_QUIT){
+                quit = 1;
+            }
+            if(e.type == SDL_KEYDOWN){
+                
+            }
+        }
+    }
+    Mix_CloseAudio();
+        delete_Table(ht); //delete the table
+
+    close_Window(window);
 }

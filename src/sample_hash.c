@@ -89,7 +89,7 @@ Entry* hash_lookup (const char* file, Table* t){
 
     Entry* temp = malloc(sizeof(Entry));
     temp->file = file; 
-    temp->chunk = NULL;
+    temp->chunk = Mix_LoadWAV(file);
     temp->next = NULL;
     *e = temp;
     t->length++;

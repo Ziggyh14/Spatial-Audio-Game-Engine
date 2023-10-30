@@ -23,9 +23,4 @@ void close_Window(SDL_Window* window){
     SDL_Quit();
 }
 
-Mix_Chunk* play_Sample(const char* file){
-    Mix_Chunk* temp = Mix_LoadWAV(file);
-    Mix_PlayChannel(-1 ,temp,0);
-    return temp;
-}
 
