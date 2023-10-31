@@ -24,10 +24,11 @@ typedef struct Table {
 
 } Table;
 
+Table* ht;
 
 Table* create_Table(void);
 
-void delete_Table(Table* t);
+void delete_Table();
 
 void free_Entry(Entry* e);
 
@@ -35,9 +36,9 @@ void free_Entry(Entry* e);
 Hashes filename and returns pointer to entry in hash table
     -Creates and entry is one doesnt exist.
     -Finds and entry is it does already exist.
-    -Returns NULL if table is at capacity.
+    -Returns NULL if table hasnt been initialised, is at max capacity, or sample couldnt be loaded
 */
-Entry* hash_lookup (const char* file, Table* table);
+Entry* hash_lookup (const char* file);
 
 /*
 Simple Implementation of a djb2 hash function returns hash from given string.

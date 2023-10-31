@@ -3,24 +3,19 @@
 
 int main(int argc, char** argv){
     int i;
-    Table* ht = create_Table();
+    create_Table();
     if (ht == NULL){
         printf("ERROR: NO TABLE MADE\n");
         return 1;
     }
 
-    
-    
     SDL_Window* window = init_Window("DEMO", 1280,720);
     
     //Mixer test
-    Mix_OpenAudio(
-        MIX_DEFAULT_FREQUENCY,
-        MIX_DEFAULT_FORMAT,
-        2,4096);
+    init_Sample_Playback();
     
    
-    play_Sample("bin/bassloop.wav",0,ht);
+    play_Sample("bin/bassloop.wav");
 
     //printf the hash table
     printf("\n TABLE, CAPACITY = %d\n",ht->capacity);
@@ -39,6 +34,7 @@ int main(int argc, char** argv){
             printf("\n");
         }
     }
+    
     SDL_Event e;
     int quit = 0;
     while(!quit){
@@ -52,7 +48,7 @@ int main(int argc, char** argv){
         }
     }
     Mix_CloseAudio();
-        delete_Table(ht); //delete the table
+    delete_Table(); //delete the table
 
     close_Window(window);
 }
