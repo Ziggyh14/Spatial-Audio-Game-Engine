@@ -15,7 +15,7 @@ int main(int argc, char** argv){
     init_Sample_Playback();
     
    
-    play_Sample("bin/bassloop.wav");
+    play_Sample("bin/bassloop.wav",0);
 
     //printf the hash table
     printf("\n TABLE, CAPACITY = %d\n",ht->capacity);

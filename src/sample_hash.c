@@ -63,7 +63,6 @@ Entry* hash_lookup (const char* file){
     -   ELSE
     -       e now points to the tail of the list at that index so...
     -
-    -
     -IF table at max capacity
     -   RETURN NULL
     -CREATE new entry at e
