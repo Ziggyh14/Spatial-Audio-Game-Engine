@@ -122,3 +122,28 @@ unsigned long djb2_hash(const char *str)
 
     return hash;
 }
+
+/*
+Print hash table
+*/
+void print_ht(){
+    int i;
+    if(ht==NULL)
+        return;
+
+    for(i=0;i<TABLE_CAPACITY;i++){
+        if(ht->entries[i] == NULL){
+            printf("%d:-----\n",i);
+        }else{
+            printf("%d: ",i);
+            Entry* e = ht->entries[i];
+            printf("%s, ",e->file);
+            while(e->next != NULL){
+                e=e->next;
+                printf("%s, ",e->file);
+            }
+            
+            printf("\n");
+        }
+    }
+}

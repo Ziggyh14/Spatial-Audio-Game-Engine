@@ -1,7 +1,7 @@
 #include "sdl_func.h"
 #include "sample_func.h"
 
-void print_ht();
+
 
 int main(int argc, char** argv){
 
@@ -20,14 +20,13 @@ int main(int argc, char** argv){
     printf_Q(q);
 
     enqueue_Sample("bin/jazz.wav",-1,q);
-   
     enqueue_Sample("bin/door.wav",-1,q);
     enqueue_Sample("bin/jazz.wav",-1,q);
 
-    play_Sample("bin/bassloop.wav",0);
+   // play_Sample("bin/bassloop.wav",0);
 
     print_ht();
-    
+
     SDL_Event e;
     int quit = 0;
     while(!quit){
@@ -42,32 +41,9 @@ int main(int argc, char** argv){
         }
     }
 
+    free(q);
     close_Sample_Playback();
 
     close_Window(window);
 }
 
-/*
-Print hash table
-*/
-void print_ht(){
-    int i;
-    if(ht==NULL)
-        return;
-
-    for(i=0;i<TABLE_CAPACITY;i++){
-        if(ht->entries[i] == NULL){
-            printf("%d:-----\n",i);
-        }else{
-            printf("%d: ",i);
-            Entry* e = ht->entries[i];
-            printf("%s, ",e->file);
-            while(e->next != NULL){
-                e=e->next;
-                printf("%s, ",e->file);
-            }
-            
-            printf("\n");
-        }
-    }
-}

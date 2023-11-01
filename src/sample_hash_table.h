@@ -45,5 +45,6 @@ Simple Implementation of a djb2 hash function returns hash from given string.
 */
 unsigned long djb2_hash(const char *str);
 
+void print_ht();
 
 

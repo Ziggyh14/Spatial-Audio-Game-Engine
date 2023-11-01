@@ -117,6 +117,4 @@ void printf_Q(SampleQueue* sq){
         }
         printf("\n");
     }
-    
-    
 }
