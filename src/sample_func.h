@@ -8,8 +8,9 @@
 
 #define DEFAULT_CHANNEL_NO 16
 
-
 void init_Sample_Playback();
+
+void close_Sample_Playback();
 
 /*
 - Plays a sample from a given file,
@@ -24,8 +25,7 @@ extern int play_Sample_Timed(const char* file, int loops, int mtime);
 #define play_Sample(file,loops) play_Sample_Timed(file,loops,-1);
 
 typedef struct SampleInfo{
-    Mix_Chunk* chunk;
-    int loop;
+    const char* file;
     int mtime;
     struct SampleInfo* next;
 } SampleInfo;
@@ -37,7 +37,7 @@ typedef struct SampleQueue{
     int channel;
 } SampleQueue;
 
-int queue_Count = 0; // Amount of queues initialised
+int queue_Count; // Amount of queues initialised
 
 /*
 Initialse a SampleQueue and return a pointer to it
@@ -54,7 +54,7 @@ sample may end before mtime has elapsed if it (and its loops) are shorter than m
   -1 will let sample play out entirely.
 - returns queue position on sucess, -1 on failure.
 */
-int queue_Sample(const char* file, int mtime, SampleQueue* sq);
+int enqueue_Sample(const char* file, int mtime, SampleQueue* sq);
 
 void dequeue_Sample(SampleQueue* sq);
 
@@ -66,4 +66,5 @@ if the queue is not empty nothing the queue is playing is playing
 */
 void handle_Queue(SampleQueue* sq);
 
+void printf_Q(SampleQueue* sq);
 #endif
