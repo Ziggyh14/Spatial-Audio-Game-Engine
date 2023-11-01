@@ -5,7 +5,8 @@
 #ifndef SAMPLE_FUNC_H
 #define SAMPLE_FUNC_H
 
-#define QUEUE_CHANNEL 0
+
+#define DEFAULT_CHANNEL_NO 16
 
 
 void init_Sample_Playback();
@@ -26,28 +27,43 @@ typedef struct SampleInfo{
     Mix_Chunk* chunk;
     int loop;
     int mtime;
-    SampleInfo* next;
-
+    struct SampleInfo* next;
 } SampleInfo;
 
 typedef struct SampleQueue{
     SampleInfo* head;
     SampleInfo* tail;
     int length;
+    int channel;
 } SampleQueue;
+
+int queue_Count = 0; // Amount of queues initialised
+
+/*
+Initialse a SampleQueue and return a pointer to it
+- samples in the queue are played on thier own channel, meaning other samples can be played without disturbing the queue
+*/
+SampleQueue* init_Queue();
 
 /*
 push sample to queue, plays after all samples pushed before it.
-samples are played on thier own channel, meaning other samples can be played without disturbing the queue
 - file: file location of the sample
 - mtime: max time a sample will play until it is cut off. 
 - queue to push to (array of string constants)
 sample may end before mtime has elapsed if it (and its loops) are shorter than mtime
--1 will let sample play out entirely.
+  -1 will let sample play out entirely.
 - returns queue position on sucess, -1 on failure.
 */
-int queue_sample(const char* file, int mtime, SampleQueue* sq);
+int queue_Sample(const char* file, int mtime, SampleQueue* sq);
 
-int dequeue_sample(SampleQueue* sq);
+void dequeue_Sample(SampleQueue* sq);
+
+/*
+Handles playing from a given SampleQueue
+- Will play the next sample in the queue 
+if the queue is not empty nothing the queue is playing is playing
+- Then dequeue it
+*/
+void handle_Queue(SampleQueue* sq);
 
 #endif
