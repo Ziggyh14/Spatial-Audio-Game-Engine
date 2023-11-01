@@ -1,10 +1,21 @@
 #include "sdl_func.h"
 #include "sample_func.h"
+#include "state_manager.h"
 
-
+unsigned int init1(){
+    printf("hello, world!\n");
+    return 0;
+}
 
 int main(int argc, char** argv){
 
+    State s = {0};
+    s.init = &init1;
+    s.init();
+    return 0;
+}
+
+/*
     create_Table();
     if (ht == NULL){
         return 1;
@@ -45,5 +56,4 @@ int main(int argc, char** argv){
     close_Sample_Playback();
 
     close_Window(window);
-}
-
+*/
