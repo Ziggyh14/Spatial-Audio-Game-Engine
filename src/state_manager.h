@@ -8,8 +8,8 @@ typedef unsigned int (*fpFl)(float);
 typedef struct State{
    
     unsigned int (*init)();
-    unsigned int (*update)(float);
-    unsigned int (*draw)(float);
+    unsigned int (*update)(unsigned int);
+    unsigned int (*draw)(unsigned int);
     unsigned int (*free)();
 
 } State;

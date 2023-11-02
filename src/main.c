@@ -1,18 +1,77 @@
 #include "sdl_func.h"
 #include "sample_func.h"
 #include "state_manager.h"
+#include "event_handler.h"
 
-unsigned int init1(){
-    printf("hello, world!\n");
+#define TRUE 1
+#define FALSE 0
+#define ui64 uint64_t
+#define ui32 uint32_t
+
+#define QUIT_CHECK if(SDL_QuitRequested()){break;}
+
+int playerpos = 0;
+int check = 0;
+
+
+ui32 update1(ui32 dT){
+
+    SDL_Event e;
+    while(pollEvent(&e)){
+        if(isKeyDown(e)){
+            switch(getKeyPressed(e)){
+                case KEY_UP: playerpos++; break;
+                case KEY_DOWN: playerpos--; break;
+                default: break;
+            }
+            printf("%d\n",playerpos);
+
+        }
+    }
+
+    return 0;
+}
+
+unsigned int draw1(){
+    if(playerpos == 50 && check == 0){
+        play_Sample("bin/jazz.wav",0);
+        check = 1;
+    }
     return 0;
 }
 
 int main(int argc, char** argv){
 
     State s = {0};
-    s.init = &init1;
-    s.init();
-    return 0;
+    s.draw = &draw1;
+    s.update = &update1;
+
+    create_Table(); // must be called before init_window
+
+    SDL_Window* w = init_Window("DEMO", 1280,720);
+
+    init_Sample_Playback();
+
+    play_Sample("bin/jazz.wav",0);
+
+    int running = TRUE;
+    ui32 lastTick = 0;
+    ui32 dT = 0;
+
+    while (running){
+
+        QUIT_CHECK;
+
+        dT = SDL_GetTicks() - lastTick;
+        lastTick = SDL_GetTicks();
+
+        //STATE FUNCTIONS
+        s.update(dT);
+        s.init();
+    }
+    close_Sample_Playback();
+    close_Window(w);
+    
 }
 
 /*
