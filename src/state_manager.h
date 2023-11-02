@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef STATE_MANAGER_H
 #define STATE_MANAGER_H
 
@@ -10,7 +12,7 @@ typedef struct State{
     unsigned int (*init)();
     unsigned int (*update)(unsigned int);
     unsigned int (*draw)(unsigned int);
-    unsigned int (*free)();
+    unsigned int (*destroy)();
 
 } State;
 
@@ -22,14 +24,14 @@ typedef struct StateManager{
 
 } StateManager;
 
-/*---------TODO----------
-- init state manager
-- free statemanger
-- push
-- pop
-- head
-- update
-- draw
-*/
+StateManager* init_StateManager(int capacity);
+void free_StateManager(StateManager* sm);
+unsigned int push_State(State* s, StateManager* sm);
+unsigned int pop_State(StateManager* sm);
+State* peak_State(StateManager* sm);
+
+unsigned int update_StateManager(StateManager* sm, unsigned int dT);
+unsigned int draw_StateManager(StateManager* sm, unsigned int dT);
+
 
 #endif

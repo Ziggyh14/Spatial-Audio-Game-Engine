@@ -3,11 +3,13 @@
 #include "state_manager.h"
 #include "event_handler.h"
 
-#define TRUE 1
-#define FALSE 0
+
 #define ui64 uint64_t
 #define ui32 uint32_t
+
 #define PLAYER_VEL 0.5
+#define TRUE 1
+#define FALSE 0
 
 #define QUIT_CHECK if(SDL_QuitRequested()){break;}
 
