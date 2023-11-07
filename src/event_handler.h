@@ -32,9 +32,10 @@ int isKeyHeld(SDL_Event event);
 
 KEY_CODE getKeyPressed(SDL_Event event);
           
-
-//Set delay of time (milliseconds), store the delay in pointer var;
-//e.g: setDelay(&i, 100) sets of 100 miliseconds and stores it in i;
+/*
+- Set delay of time (milliseconds), store the delay in pointer var
+- e.g: setDelay(&i, 100) sets of 100 miliseconds and stores it in i
+*/
 void setDelay (int* var, int time);
 //ticks decrements value of pointer by 1, to represent a tick in the set delay.
 void delayTick (int* var);
