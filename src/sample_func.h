@@ -27,6 +27,13 @@ extern int play_Sample_Timed_InChannel(const char* file, int loops, int mtime,in
 
 #define play_Sample(file,loops) play_Sample_Timed_InChannel(file,loops,-1,-1);
 
+/*
+- Sets volume of sample given by filename.
+- Safe to use even if file has not been played before.
+- passing voume as -1 will return the existing volume of the sample and not change it.
+*/
+int sample_Volume(const char* file, int volume);
+
 typedef struct SampleInfo{
     const char* file;
     int mtime;

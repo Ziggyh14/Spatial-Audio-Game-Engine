@@ -31,6 +31,12 @@ extern int play_Sample_Timed_InChannel(const char* file, int loops, int mtime,in
     return 0;
 }
 
+int sample_Volume(const char* file, int volume){
+    Entry* e = hash_lookup(file);
+    return Mix_VolumeChunk(e,volume);
+}
+
+
 SampleQueue* init_Queue(){
 
     /*
