@@ -1,11 +1,12 @@
 #include "sample_func.h"
 
+int queue_Count; // Amount of queues initialised
 
-void init_Sample_Playback(){ //todo make init variables parameters
+void init_Sample_Playback(int freq, Uint16 format, int chunksize){ //todo make init variables parameters
     
-    Mix_OpenAudio(MIX_DEFAULT_FREQUENCY,MIX_DEFAULT_FORMAT,2,4096);
+    Mix_OpenAudio(freq,format,2,chunksize);
     Mix_AllocateChannels(DEFAULT_CHANNEL_NO+1); // Allocate channels + queue buffer
-    printf("Allocated channels %d\n", Mix_AllocateChannels(DEFAULT_CHANNEL_NO+1));
+    //printf("Allocated channels %d\n", Mix_AllocateChannels(DEFAULT_CHANNEL_NO+1));
     queue_Count = 0;
     Mix_ReserveChannels(1); // Reserve a buffer channel for a possible queue to go
 }
@@ -16,13 +17,17 @@ void close_Sample_Playback(){
     delete_Table(); //delete the table
 }
 
-int play_Sample_Timed(const char* file,int loops, int mtime){ 
-
+extern int play_Sample_Timed_InChannel(const char* file, int loops, int mtime,int channel){
+    
     Entry* e = hash_lookup(file);
     if(e==NULL)
         return 1;
-    
-    Mix_PlayChannelTimed(-1 ,e->chunk,loops,mtime);   
+    if(channel > DEFAULT_CHANNEL_NO){
+        printf("Error: %d channels not allocated\n",channel);
+        return 1;
+    }
+
+    Mix_PlayChannelTimed(channel ,e->chunk,loops,mtime);   
     return 0;
 }
 
@@ -44,6 +49,21 @@ SampleQueue* init_Queue(){
      
     return q;
 
+}
+
+void free_Queue(SampleQueue* sq){
+
+    if(sq->head == NULL)
+        free(sq);
+        return;
+    
+    SampleInfo* si = sq->head;
+
+    while(si!=NULL)
+        dequeue_Sample(sq);
+    
+    free(sq);
+    return;
 }
 
 int enqueue_Sample(const char* file, int mtime, SampleQueue* sq){

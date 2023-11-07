@@ -20,9 +20,12 @@ void close_Sample_Playback();
 - will cut off sample after mtime ms, if sample length is longer
 - RETURNS 0 on success, 1 on failure
 */
-extern int play_Sample_Timed(const char* file, int loops, int mtime);
 
-#define play_Sample(file,loops) play_Sample_Timed(file,loops,-1);
+extern int play_Sample_Timed_InChannel(const char* file, int loops, int mtime,int channel);
+
+#define play_Sample_Timed(file,loops,mtime) play_Sample_Timed_InChannel(file,loops,mtime,-1);
+
+#define play_Sample(file,loops) play_Sample_Timed_InChannel(file,loops,-1,-1);
 
 typedef struct SampleInfo{
     const char* file;
@@ -37,14 +40,12 @@ typedef struct SampleQueue{
     int channel;
 } SampleQueue;
 
-int queue_Count; // Amount of queues initialised
-
 /*
 Initialse a SampleQueue and return a pointer to it
 - samples in the queue are played on thier own channel, meaning other samples can be played without disturbing the queue
 */
 SampleQueue* init_Queue();
-
+void free_Queue(SampleQueue* sq);
 /*
 push sample to queue, plays after all samples pushed before it.
 - file: file location of the sample

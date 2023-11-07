@@ -17,11 +17,9 @@ StateManager* init_StateManager(int capacity){
     }
     return sm;
 }
-
 void free_StateManager(StateManager* sm){
-    
+    /*TODO*/
 }
-
 unsigned int push_State(State* s, StateManager* sm){
 
     if(sm->top == sm->max){
@@ -54,7 +52,6 @@ State* peak_State(StateManager* sm){
     return sm->stack[sm->top];
 
 }
-
 unsigned int update_StateManager(StateManager* sm, unsigned int dT){
     
     if(sm->top<0){
@@ -63,7 +60,6 @@ unsigned int update_StateManager(StateManager* sm, unsigned int dT){
     }
     return sm->stack[sm->top]->update(dT);
 }
-
 unsigned int draw_StateManager(StateManager* sm, unsigned int dT){
     
     if(sm->top<0){
