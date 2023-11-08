@@ -7,7 +7,7 @@ CFLAGS = -std=c11 -Wall -g
 
 LIBD = lib
 SDLLIBD = $(LIBD)/SDL
-INCFLAGS = -lSDL2 -lSDL2_mixer 
+INCFLAGS = -lSDL2 -lSDL2_mixer -lm
 OUT = $(BIN)/out
 SRC := $(wildcard $(SRC_DIR)/*.c)
 HEADERS := $(wildcard $(SRC_DIR)/*.h)
