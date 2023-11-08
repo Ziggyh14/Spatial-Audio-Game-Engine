@@ -1,6 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
-#include "sample_hash_table.h"
+#include "sample_hash.h"
 
 #ifndef SAMPLE_FUNC_H
 #define SAMPLE_FUNC_H

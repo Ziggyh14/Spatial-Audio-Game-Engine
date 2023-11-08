@@ -1,4 +1,4 @@
-#include "sample_hash_table.h"
+#include "sample_hash.h"
 Table* ht;
 
 Table* create_Table(void){
