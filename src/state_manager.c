@@ -9,7 +9,7 @@ StateManager* init_StateManager(int capacity){
     }
     sm->max = capacity;
     sm->top = -1;
-    sm->stack = (State **) malloc(sm->max * sizeof(State*));
+    sm->stack = (State **) calloc(sm->max, sizeof(State*));
     if(sm->stack == NULL){
         free(sm);
         printf("ERROR: Could not create stack\n");
@@ -18,7 +18,12 @@ StateManager* init_StateManager(int capacity){
     return sm;
 }
 void free_StateManager(StateManager* sm){
-    /*TODO*/
+    
+    while(sm->top >= 0){
+        pop_State(sm);
+    }
+    free(sm);
+    return;
 }
 unsigned int push_State(State* s, StateManager* sm){
 
