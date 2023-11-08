@@ -8,9 +8,9 @@
 
 #define DEFAULT_CHANNEL_NO 16
 
-void init_Sample_Playback();
+extern void init_Sample_Playback(int freq, Uint16 format, int chunksize);
 
-void close_Sample_Playback();
+extern void close_Sample_Playback();
 
 /*
 - Plays a sample from a given file,
@@ -20,8 +20,7 @@ void close_Sample_Playback();
 - will cut off sample after mtime ms, if sample length is longer
 - RETURNS 0 on success, 1 on failure
 */
-
-extern int play_Sample_Timed_InChannel(const char* file, int loops, int mtime,int channel);
+extern int play_Sample_Timed_inChannel(const char* file, int loops, int mtime,int channel);
 
 #define play_Sample_Timed(file,loops,mtime) play_Sample_Timed_InChannel(file,loops,mtime,-1);
 
@@ -48,7 +47,7 @@ typedef struct SampleQueue{
 } SampleQueue;
 
 /*
-Initialse a SampleQueue and return a pointer to it
+- Initialse a SampleQueue and return a pointer to it
 - samples in the queue are played on thier own channel, meaning other samples can be played without disturbing the queue
 */
 SampleQueue* init_Queue();

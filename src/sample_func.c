@@ -17,7 +17,7 @@ void close_Sample_Playback(){
     delete_Table(); //delete the table
 }
 
-extern int play_Sample_Timed_InChannel(const char* file, int loops, int mtime,int channel){
+extern int play_Sample_Timed_inChannel(const char* file, int loops, int mtime,int channel){
     
     Entry* e = hash_lookup(file);
     if(e==NULL)
@@ -45,6 +45,7 @@ SampleQueue* init_Queue(){
     Reserve new buffer channel
     return new queue
     */
+
     SampleQueue* q = (SampleQueue*) malloc(sizeof(SampleQueue));
     q->channel = queue_Count++;
     q->length = 0;

@@ -14,8 +14,7 @@
 #define QUIT_CHECK if(SDL_QuitRequested()){break;}
 
 float playerpos = 0;
-int check = 0;
-
+int delay = 0;
 
 ui32 update1(ui32 dT){
 
@@ -33,12 +32,13 @@ ui32 update1(ui32 dT){
     return 0;
 }
 
-ui32 draw1(){
+ui32 draw1(ui32 dT){
     
-    if(playerpos == 50 && check == 0){
+    if(playerpos == 50 && delayPassed(&delay)){
+        setDelay(&delay,1000);
         play_Sample("bin/jazz.wav",0);
-        check = 1;
     }
+    delayTick(&delay);
     return 0;
 }
 
@@ -68,7 +68,7 @@ int main(int argc, char** argv){
 
         //STATE FUNCTIONS
         s.update(dT); // update anything before "drawing" 
-       // s.draw(); // "draw" anything that needs drawing
+        s.draw(dT); // "draw" anything that needs drawing
     }
     close_Sample_Playback(); // close sample playback and delete the hash table
     close_Window(w); // close window and exit SDL
