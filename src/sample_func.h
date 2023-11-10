@@ -22,9 +22,9 @@ extern void close_Sample_Playback();
 */
 extern int play_Sample_Timed_inChannel(const char* file, int loops, int mtime,int channel);
 
-#define play_Sample_Timed(file,loops,mtime) play_Sample_Timed_InChannel(file,loops,mtime,-1);
+#define play_Sample_Timed(file,loops,mtime) play_Sample_Timed_inChannel(file,loops,mtime,-1);
 
-#define play_Sample(file,loops) play_Sample_Timed_InChannel(file,loops,-1,-1);
+#define play_Sample(file,loops) play_Sample_Timed_inChannel(file,loops,-1,-1);
 
 /*
 - Sets volume of sample given by filename.
