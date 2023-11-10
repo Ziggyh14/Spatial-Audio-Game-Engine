@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include "sample_hash.h"
+#include "event_handler.h"
 
 #ifndef SAMPLE_FUNC_H
 #define SAMPLE_FUNC_H
@@ -36,6 +37,7 @@ int sample_Volume(const char* file, int volume);
 typedef struct SampleInfo{
     const char* file;
     int mtime;
+    int delay_flag;
     struct SampleInfo* next;
 } SampleInfo;
 
@@ -44,6 +46,7 @@ typedef struct SampleQueue{
     SampleInfo* tail;
     int length;
     int channel;
+    int delayvar;
 } SampleQueue;
 
 /*
@@ -62,6 +65,8 @@ sample may end before mtime has elapsed if it (and its loops) are shorter than m
 - returns queue position on sucess, -1 on failure.
 */
 int enqueue_Sample(const char* file, int mtime, SampleQueue* sq);
+
+int enqueue_Delay(int time, SampleQueue* sq);
 
 void dequeue_Sample(SampleQueue* sq);
 

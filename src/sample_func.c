@@ -51,6 +51,7 @@ SampleQueue* init_Queue(){
     q->length = 0;
     q->head = NULL;
     q->tail = NULL;
+    q->delayvar = 0;
     Mix_AllocateChannels(DEFAULT_CHANNEL_NO+1+queue_Count);
     Mix_ReserveChannels(queue_Count+1);
      
@@ -85,6 +86,7 @@ int enqueue_Sample(const char* file, int mtime, SampleQueue* sq){
 
     si->mtime = mtime;
     si->file = file;
+    si->delay_flag = 0;
     si->next = NULL;
 
     if(sq->head == NULL){
@@ -102,6 +104,31 @@ int enqueue_Sample(const char* file, int mtime, SampleQueue* sq){
     return sq->length;
    
 }
+
+int enqueue_Delay(int time, SampleQueue* sq){
+
+    SampleInfo* si = (SampleInfo*)malloc(sizeof(SampleInfo));
+    si->delay_flag = 1;
+    si->mtime = time;
+    si->next = NULL;
+    si->file = "__DELAY__"; 
+
+    if(sq->head == NULL){
+        sq->head = si;
+        sq->tail = si;
+        sq->length = 1;
+        printf_Q(sq);
+        return sq->length;
+    }
+    
+    sq->tail->next = si;
+    sq->tail = si;
+    sq->length += 1;
+    printf_Q(sq);
+    return sq->length;
+   
+}
+
 
 void dequeue_Sample(SampleQueue* sq){
 
@@ -124,9 +151,18 @@ void handle_Queue(SampleQueue* sq){
     if(Mix_Playing(sq->channel))
         return;
     
+    if(!delayPassed(&sq->delayvar)){
+        return;
+    }
+
+    if(sq->head->delay_flag){
+        setDelay(&sq->delayvar, sq->head->mtime);
+    }
+    else{
     printf("Play sample on channel %d\n",sq->channel);
     Entry* e = hash_lookup(sq->head->file);
     Mix_PlayChannelTimed(sq->channel, e->chunk,0,sq->head->mtime);
+    }
     dequeue_Sample(sq);
 
     return;
