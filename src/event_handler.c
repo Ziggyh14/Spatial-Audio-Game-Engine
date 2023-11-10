@@ -24,16 +24,12 @@ KEY_CODE getKeyPressed(SDL_Event event){
 }
 
 void setDelay (int* var, int time){
-    *var = time;
+    *var = SDL_GetTicks() + time;
     return;
 }
-void delayTick (int *var){
-    if(*var > 0 )
-        (*var)--;
-    return;
-}
+
 int delayPassed (int *var){
-    if(*var <= 0 )
+    if(*var < SDL_GetTicks() )
         return 1;
     return 0; 
 }

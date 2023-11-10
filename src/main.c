@@ -38,7 +38,6 @@ ui32 draw1(ui32 dT){
         setDelay(&delay,1000);
         play_Sample("bin/jazz.wav",0);
     }
-    delayTick(&delay);
     return 0;
 }
 
