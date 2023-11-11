@@ -33,7 +33,8 @@ unsigned int push_State(State* s, StateManager* sm){
     }
     
     sm->stack[++(sm->top)] = s;
-    return sm->stack[++(sm->top)]->init();
+    printf("state added\n");
+    return (peak_State(sm))->init();
 
 }
 unsigned int pop_State(StateManager* sm){

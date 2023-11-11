@@ -26,7 +26,7 @@ extern int play_Sample_Timed_inChannel(const char* file, int loops, int mtime,in
         printf("Error: %d channels not allocated\n",channel);
         return 1;
     }
-
+    
     Mix_PlayChannelTimed(channel ,e->chunk,loops,mtime);   
     return 0;
 }
@@ -157,11 +157,10 @@ void handle_Queue(SampleQueue* sq){
 
     if(sq->head->delay_flag){
         setDelay(&sq->delayvar, sq->head->mtime);
-    }
-    else{
-    printf("Play sample on channel %d\n",sq->channel);
-    Entry* e = hash_lookup(sq->head->file);
-    Mix_PlayChannelTimed(sq->channel, e->chunk,0,sq->head->mtime);
+    }else{
+        printf("Play sample on channel %d\n",sq->channel);
+        Entry* e = hash_lookup(sq->head->file);
+        Mix_PlayChannelTimed(sq->channel, e->chunk,0,sq->head->mtime);
     }
     dequeue_Sample(sq);
 
