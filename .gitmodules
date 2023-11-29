@@ -1,0 +1,3 @@
+[submodule "src/lib/openal-soft"]
+	path = src/lib/openal-soft
+	url = git@github.com:kcat/openal-soft.git
