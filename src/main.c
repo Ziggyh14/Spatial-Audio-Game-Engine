@@ -108,3 +108,17 @@ int main(int argc, char** argv){
     close_Window(w); // close window and exit SDL
 }
 
+
+
+/*
+#include <stdio.h>
+#include "SDL.h"
+#include "AL/al.h"
+#include "AL/alc.h"
+
+int main(int argc, char **argv){
+    printf("hello world!\n");
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    ALCdevice *device = alcOpenDevice(NULL);
+}
+*/

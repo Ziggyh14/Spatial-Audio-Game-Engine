@@ -56,7 +56,7 @@ Entry* hash_lookup (const char* file){
     -IF e is not NULL
     -then there is already an entry at that hash index
     -IF its first in the list, 
-    -   RETURN index
+    -   RETURN entry 
     -ELSE
     -   search through list for file, pointing e to it's own next
     -   IF is found then
