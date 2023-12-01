@@ -1,3 +1,6 @@
 [submodule "src/lib/openal-soft"]
 	path = src/lib/openal-soft
 	url = git@github.com:kcat/openal-soft.git
+[submodule "src/lib/SDL_sound"]
+	path = src/lib/SDL_sound
+	url = git@github.com:icculus/SDL_sound.git
