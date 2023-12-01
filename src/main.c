@@ -1,3 +1,4 @@
+/*
 #include "sdl_func.h"
 #include "sample_func.h"
 #include "state_manager.h"
@@ -109,7 +110,7 @@ int main(int argc, char** argv){
 }
 
 
-
+*/
 /*
 #include <stdio.h>
 #include "SDL.h"
@@ -122,3 +123,64 @@ int main(int argc, char **argv){
     ALCdevice *device = alcOpenDevice(NULL);
 }
 */
+
+#include "SDL_sound.h"
+#include "al.h"
+#include "alc.h"
+#include "alext.h"
+
+int main(){
+    
+    Sound_Init();
+    Sound_Sample* s;
+    Sound_AudioInfo* i = malloc(sizeof(Sound_AudioInfo));
+   
+    i->channels = 2;
+    i->rate = 44100;
+    i->format = AUDIO_S16;
+
+    s = Sound_NewSampleFromFile("jazz.wav",i,65536);
+
+    if(s==NULL){
+        printf("no s\n");
+    }
+
+    Sound_DecodeAll(s);
+   
+    printf("channels, %d\nfreq: %d,\nbitspersample: %x\nsize: %d\nflags: %x\n",
+            s->actual.channels,s->actual.rate,s->actual.format,s->buffer_size,s->flags);
+    
+    ALCdevice* d = alcOpenDevice(NULL);
+    ALCcontext* c = alcCreateContext(d,NULL);
+    alcMakeContextCurrent(c);
+    printf("device open and context made\n");
+
+    ALuint buffer;
+    alGenBuffers(1,&buffer);
+    ALenum f = AL_FORMAT_STEREO16;
+    alBufferData(buffer,f,s->buffer,s->buffer_size,s->actual.rate);
+    printf("buffer generated\n");
+
+    ALuint sc;
+    alGenSources(1,&sc);
+    alSourcei(sc,AL_LOOPING, AL_FALSE);
+    alSourcei(sc,AL_BUFFER,buffer);
+    printf("source added\n");
+
+    alSourcePlay(sc);
+    ALint state = AL_PLAYING;
+
+    while(state == AL_PLAYING)
+    {
+        //printf("sound playing\n");
+        alGetSourcei( sc, AL_SOURCE_STATE, &state);
+    }
+    
+    Sound_FreeSample(s);
+    Sound_Quit();
+    alcDestroyContext(c);
+    alcCloseDevice(d);
+
+
+
+}
