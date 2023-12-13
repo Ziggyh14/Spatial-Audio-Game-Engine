@@ -11,7 +11,7 @@ Table* create_Table(void){
     }
 
     ht->capacity = TABLE_CAPACITY;
-    ht->length = 0;
+    ht->size = 0;
     ht->entries = calloc(ht->capacity, sizeof(Entry*));
 
     if (ht->entries == NULL){
@@ -36,8 +36,8 @@ void delete_Table(){
 }
 
 void free_Entry(Entry* e){
-    if(e->chunk!=NULL)
-        Mix_FreeChunk(e->chunk);
+    if(e->sample!=NULL)
+        Sound_FreeSample(e->sample);
     if(e->next!=NULL)
         free_Entry(e->next);
     free(e);
@@ -87,7 +87,7 @@ Entry* hash_lookup (const char* file){
         e = &((*e)->next);
     }
 
-    if(ht->length > ht->capacity){
+    if(ht->size > ht->capacity){
         printf("capacity is exceeded\n");
         return NULL;
     }
@@ -99,16 +99,16 @@ Entry* hash_lookup (const char* file){
     Entry* temp = malloc(sizeof(Entry));
     temp->file = file; 
     temp->next = NULL;
-
-    temp->chunk = Mix_LoadWAV(file);
-    if(temp->chunk == NULL){
+    temp->sample = Sound_NewSampleFromFile(file,get_DesiredAudioInfo(),BUFFER_SIZE);
+    temp->loops = 0;
+    if(temp->sample == NULL){
         printf("Entry not added, ERROR: %s",SDL_GetError());
         free(temp);
         return NULL;
     }
 
     *e = temp;
-    ht->length++; //increase counter of used table entries
+    ht->size++; //increase counter of used table entries
     
     return *e;
 }
@@ -147,4 +147,17 @@ void print_ht(){
             printf("\n");
         }
     }
+}
+
+Sound_AudioInfo* get_DesiredAudioInfo(){
+    if(hush_AI == NULL){
+        return NULL;
+    }
+    return hush_AI->desired_Format;
+}
+ALCdevice* get_AudioDevice(){
+    if(hush_AI == NULL){
+        return NULL;
+    }
+    return hush_AI->device;
 }

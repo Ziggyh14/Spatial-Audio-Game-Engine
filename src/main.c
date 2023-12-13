@@ -123,11 +123,12 @@ int main(int argc, char **argv){
     ALCdevice *device = alcOpenDevice(NULL);
 }
 */
-
+/*
 #include "SDL_sound.h"
 #include "al.h"
 #include "alc.h"
 #include "alext.h"
+
 
 int main(){
     
@@ -182,5 +183,36 @@ int main(){
     alcCloseDevice(d);
 
 
+
+}
+*/
+
+#include "sample_func.h"
+
+int main(){
+
+    SDL_Init(SDL_INIT_AUDIO);
+    init_Sample_Playback(AUDIO_S16,44100);
+
+    ALCcontext* c = alcCreateContext(get_AudioDevice(),NULL);
+    alcMakeContextCurrent(c);
+
+    hush_Vector3 pos = {0,0,0};
+    hush_AudioSource* src = hush_init_Source(SOURCE_PITCH_DEFAULT,SOURCE_GAIN_DEFAULT,pos,pos);
+
+    hush_playSoundAtSource("jazz.wav",src,1);
+
+    ALint state = AL_PLAYING;
+
+    while(state == AL_PLAYING)
+    {
+        //printf("sound playing\n");
+        feed_source(src);
+        alGetSourcei( src->source, AL_SOURCE_STATE, &state);
+    }
+
+    alcDestroyContext(c);
+    close_Sample_Playback();
+    SDL_Quit();
 
 }

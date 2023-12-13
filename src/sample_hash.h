@@ -1,17 +1,21 @@
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
+#include "al.h"
+#include "alc.h"
+#include "alext.h"
+#include "SDL_sound.h"
 
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
 #define TABLE_CAPACITY 50
+#define BUFFER_SIZE 65536
 
 //Test for a hash table for allocated samples
 
 typedef struct Entry {
     const char* file;
-    Mix_Chunk* chunk;
+    Sound_Sample* sample;
+    int16_t loops;
     struct Entry* next;
 
 } Entry;
@@ -19,9 +23,21 @@ typedef struct Entry {
 typedef struct Table {
     Entry** entries;
     int capacity;
-    int length;
+    int size;
 
 } Table;
+
+typedef struct hush_AudioInfo{
+	
+	ALCdevice* device;
+	Sound_AudioInfo* desired_Format;
+
+} hush_AudioInfo;
+
+Sound_AudioInfo* get_DesiredAudioInfo();
+ALCdevice* get_AudioDevice();
+
+hush_AudioInfo *hush_AI;
 
 Table* create_Table(void);
 
@@ -43,5 +59,8 @@ Simple Implementation of a djb2 hash function returns hash from given string.
 unsigned long djb2_hash(const char *str);
 
 void print_ht();
+
+//audio info
+
 
 #endif

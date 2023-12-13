@@ -1,184 +1,117 @@
 #include "sample_func.h"
 
-int queue_Count; // Amount of queues initialised
+// Amount of queues initialised
 
-void init_Sample_Playback(int freq, Uint16 format, int chunksize){ //todo make init variables parameters
+hush_AudioSource* hush_init_Source(ALfloat pitch,ALfloat gain,hush_Vector3 position,hush_Vector3 velocity){
+
+    hush_AudioSource* hsh_src =  malloc(sizeof(hush_AudioSource));
+    alAssert(alGenSources(1,&(hsh_src->source)));
+    alAssert(alSourcef(hsh_src->source,AL_PITCH,pitch));
+    alAssert(alSourcef(hsh_src->source,AL_GAIN,gain));
+    alAssert(alSource3f(hsh_src->source,AL_POSITION,position.x,position.y,position.z));
+    alAssert(alSource3f(hsh_src->source,AL_VELOCITY,velocity.x,velocity.y,velocity.z));
     
-    Mix_OpenAudio(freq,format,2,chunksize);
-    Mix_AllocateChannels(DEFAULT_CHANNEL_NO+1); // Allocate channels + queue buffer
-    //printf("Allocated channels %d\n", Mix_AllocateChannels(DEFAULT_CHANNEL_NO+1));
+    
+    alAssert(alSourcei(hsh_src->source,AL_LOOPING,AL_FALSE));
+    
+
+    alAssert(alGenBuffers(NUM_BUFFERS,&(hsh_src->buffers)));
+    printf("source created\n");
+    return hsh_src;
+}
+
+extern int hush_playSoundAtSource(const char* file,hush_AudioSource* hsh_src,int16_t loops){
+
+    int i;
+    hsh_src->entry = hash_lookup(file);
+    if(loops == -1)
+        loops = INT16_MAX;
+    
+    hsh_src->entry->loops = loops;
+    Sound_Sample* sample = hsh_src->entry->sample;
+    for(i = 0;i<NUM_BUFFERS;i++){
+        Uint32 size = Sound_Decode(sample);
+        void* data = calloc(BUFFER_SIZE,1);
+        memcpy(&data[0],sample->buffer,size);
+        
+        if(size<BUFFER_SIZE){
+            hsh_src->entry->loops--;
+            if(hsh_src->entry->loops>=0){
+                Sound_Rewind(sample);
+                Sound_SetBufferSize(sample, BUFFER_SIZE-size);
+                Sound_Decode(sample);
+                memcpy(&data[size],sample->buffer,BUFFER_SIZE-size);
+                Sound_SetBufferSize(sample, BUFFER_SIZE);
+            }
+        }
+        alAssert(alBufferData(hsh_src->buffers[i],AL_FORMAT_STEREO16,data,BUFFER_SIZE,sample->actual.rate));
+        free(data);
+    }    
+
+    alAssert(alSourceQueueBuffers(hsh_src->source,NUM_BUFFERS,&(hsh_src->buffers[0])));
+    alAssert(alSourcePlay(hsh_src->source));
+    printf("sample playing\n");
+    return 0;
+}
+
+extern void feed_source(hush_AudioSource* hsh_src){
+
+    int buffersProcessed = 0;
+    alAssert(alGetSourcei(hsh_src->source,AL_BUFFERS_PROCESSED,&buffersProcessed));
+
+    if(buffersProcessed<=0)
+        return;
+
+    while(buffersProcessed-- && hsh_src->entry->loops>=0){
+
+        ALuint buf;
+        alAssert(alSourceUnqueueBuffers(hsh_src->source,1,&buf))
+
+        void* data = calloc(BUFFER_SIZE,1);
+        Sound_Sample* sample = hsh_src->entry->sample;
+        Uint32 size = Sound_Decode(sample);
+        memcpy(&data[0],sample->buffer,size);
+        if(size<BUFFER_SIZE){
+            hsh_src->entry->loops--;
+            if(hsh_src->entry->loops>=0){
+
+                Sound_Rewind(sample);
+                Sound_SetBufferSize(sample, BUFFER_SIZE-size);
+                Sound_Decode(sample);
+                memcpy(&data[size],sample->buffer,BUFFER_SIZE-size);
+                Sound_SetBufferSize(sample, BUFFER_SIZE);
+            }
+        }      
+
+        alAssert(alBufferData(buf,AL_FORMAT_STEREO16,data,BUFFER_SIZE,sample->actual.rate));
+        alAssert(alSourceQueueBuffers(hsh_src->source,1,&buf));
+        free(data);
+    }
+
+}
+
+
+void init_Sample_Playback(Uint16 format,Uint32 rate){ //todo make init variables parameters
+    
+    create_Table();
+    Sound_Init();
+    ALCdevice* d = alcOpenDevice(NULL);
+    hush_AI = malloc(sizeof(hush_AudioInfo));
+    hush_AI->device = d;
+    hush_AI->desired_Format = malloc(sizeof(Sound_AudioInfo));
+    hush_AI->desired_Format->channels = 2;
+    hush_AI->desired_Format->format   = format;
+    hush_AI->desired_Format->rate     = rate;
     queue_Count = 0;
-    Mix_ReserveChannels(1); // Reserve a buffer channel for a possible queue to go
+    printf("playback initialised\n");
+
 }
 
 void close_Sample_Playback(){
 
-    Mix_CloseAudio();
+    Sound_Quit();
+    alcCloseDevice(get_AudioDevice());
     delete_Table(); //delete the table
 }
 
-extern int play_Sample_Timed_inChannel(const char* file, int loops, int mtime,int channel){
-    
-    Entry* e = hash_lookup(file);
-    if(e==NULL)
-        return 1;
-    if(channel > DEFAULT_CHANNEL_NO){
-        printf("Error: %d channels not allocated\n",channel);
-        return 1;
-    }
-    
-    Mix_PlayChannelTimed(channel ,e->chunk,loops,mtime);   
-    return 0;
-}
 
-int sample_Volume(const char* file, int volume){
-    Entry* e = hash_lookup(file);
-    return Mix_VolumeChunk(e->chunk,volume);
-}
-
-
-SampleQueue* init_Queue(){
-
-    /*
-    Alloc space in memory
-    Assign it reserved channel
-    Reserve new buffer channel
-    return new queue
-    */
-
-    SampleQueue* q = (SampleQueue*) malloc(sizeof(SampleQueue));
-    q->channel = queue_Count++;
-    q->length = 0;
-    q->head = NULL;
-    q->tail = NULL;
-    q->delayvar = 0;
-    Mix_AllocateChannels(DEFAULT_CHANNEL_NO+1+queue_Count);
-    Mix_ReserveChannels(queue_Count+1);
-     
-    return q;
-
-}
-
-void free_Queue(SampleQueue* sq){
-
-    if(sq->head == NULL){
-        free(sq);
-        return;
-    }
-    
-    SampleInfo* si = sq->head;
-
-    while(si!=NULL)
-        dequeue_Sample(sq);
-    
-    free(sq);
-    return;
-}
-
-int enqueue_Sample(const char* file, int mtime, SampleQueue* sq){
-
-    SampleInfo* si = (SampleInfo*)malloc(sizeof(SampleInfo));
-    Entry *e = hash_lookup(file);
-    if(e==NULL){
-        free(si);
-        return -1;
-    }
-
-    si->mtime = mtime;
-    si->file = file;
-    si->delay_flag = 0;
-    si->next = NULL;
-
-    if(sq->head == NULL){
-        sq->head = si;
-        sq->tail = si;
-        sq->length = 1;
-        printf_Q(sq);
-        return sq->length;
-    }
-    
-    sq->tail->next = si;
-    sq->tail = si;
-    sq->length += 1;
-    printf_Q(sq);
-    return sq->length;
-   
-}
-
-int enqueue_Delay(int time, SampleQueue* sq){
-
-    SampleInfo* si = (SampleInfo*)malloc(sizeof(SampleInfo));
-    si->delay_flag = 1;
-    si->mtime = time;
-    si->next = NULL;
-    si->file = "__DELAY__"; 
-
-    if(sq->head == NULL){
-        sq->head = si;
-        sq->tail = si;
-        sq->length = 1;
-        printf_Q(sq);
-        return sq->length;
-    }
-    
-    sq->tail->next = si;
-    sq->tail = si;
-    sq->length += 1;
-    printf_Q(sq);
-    return sq->length;
-   
-}
-
-
-void dequeue_Sample(SampleQueue* sq){
-
-    if(sq->length==0)
-        return;
-
-    SampleInfo* s = sq->head;
-    sq->head = sq->head->next;
-    sq->length -= 1;
-    printf_Q(sq);
-    free(s);
-    return;
-}
-
-void handle_Queue(SampleQueue* sq){
-
-    if(sq->length == 0)
-        return;
-
-    if(Mix_Playing(sq->channel))
-        return;
-    
-    if(!delayPassed(&sq->delayvar)){
-        return;
-    }
-
-    if(sq->head->delay_flag){
-        setDelay(&sq->delayvar, sq->head->mtime);
-    }else{
-        printf("Play sample on channel %d\n",sq->channel);
-        Entry* e = hash_lookup(sq->head->file);
-        Mix_PlayChannelTimed(sq->channel, e->chunk,0,sq->head->mtime);
-    }
-    dequeue_Sample(sq);
-
-    return;
-}
-
-void printf_Q(SampleQueue* sq){
-
-    printf("QUEUE LENGTH: %d, CHANNEL: %d\n",sq->length,sq->channel);
-    
-    if(sq->head != NULL){
-        SampleInfo* s = sq->head;
-        printf("%s",s->file);
-        while(s->next != NULL){
-            s=s->next;
-            printf(", %s",s->file);
-        }
-        printf("\n");
-    }
-    return;
-}

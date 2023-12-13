@@ -13,7 +13,9 @@ add_executable(out main.c
         state_manager.c
         event_handler.c
         collision_util.c
-        audiofile_IO.h
+        sample_hash.c
+        sample_func.c
+
         )
 
 target_include_directories(out PUBLIC ${CMAKE_SOURCE_DIR}/src)
