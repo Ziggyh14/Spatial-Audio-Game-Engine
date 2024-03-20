@@ -15,7 +15,6 @@
 typedef struct Entry {
     const char* file;
     Sound_Sample* sample;
-    int16_t loops;
     struct Entry* next;
 
 } Entry;
@@ -31,6 +30,7 @@ typedef struct hush_AudioInfo{
 	
 	ALCdevice* device;
 	Sound_AudioInfo* desired_Format;
+    int32_t bpms;
 
 } hush_AudioInfo;
 

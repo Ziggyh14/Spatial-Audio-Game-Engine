@@ -17,22 +17,28 @@
 #define SOURCE_POS_DEFAULT   {0,0,0}
 #define SOURCE_VEL_DEFAULT   {0,0,0}
 #define SOURCE_LOOP_DEFAULT  0
+#define SOURCE_REFERENCE_DEFAULT 0.1f
+#define SOURCE_ROLLOFF_DEFAULT 0.5f
+#define HUSH_STATE_PLAYING 1
+#define HUSH_STATE_STOPPED 0
 
-typedef struct hush_AudioSource{
-	ALuint source;
-	ALuint buffers[4];
-  Entry* entry;
-} hush_AudioSource;
+typedef struct hsh_aSource{
+	ALuint alSource;
+	ALuint* buffers;
+  Sound_Sample* sample;
+  int16_t loops;
+  int32_t mtime;
+  uint8_t b;
+  uint8_t loc;
+} hsh_aSource;
 
-typedef struct hush_Vector3{
+typedef struct hsh_vec3{
 	float x,y,z;
-} hush_Vector3;
+} hsh_vec3;
 
-extern hush_AudioSource* hush_init_Source(ALfloat pitch,ALfloat gain,hush_Vector3 position,hush_Vector3 velocity);
+extern hsh_aSource* hush_init_Source(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity);
 
-extern void init_Sample_Playback( Uint16 format,Uint32 rate);
-
-extern void close_Sample_Playback();
+extern void hsh_freeSource(hsh_aSource* hsh_src);
 
 /*
 - Plays a sample from a given file,
@@ -51,33 +57,37 @@ extern int play_Sample_Timed_inChannel(const char* file, int loops, int mtime,in
 
 */
 
-extern int hush_playSoundAtSource(const char* file,hush_AudioSource* source,int16_t loops);
+extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* src,int16_t loops, int32_t mtime);
 
-extern void feed_source(hush_AudioSource* hsh_src);
+extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops, int32_t mtime);
 
+extern int hsh_pauseSource(hsh_aSource* src);
 
-/*
-- Sets volume of sample given by filename.
-- Safe to use even if file has not been played before.
-- passing voume as -1 will return the existing volume of the sample and not change it.
-*/
-//int sample_Volume(const char* file, int volume);
+extern int hsh_unpauseSource(hsh_aSource* src);
 
+extern int8_t feed_source(hsh_aSource* hsh_src);
 
-typedef struct SampleInfo{
-    const char* file;
-    int mtime;
-    int delay_flag;
-    struct SampleInfo* next;
-} SampleInfo;
+extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos);
 
-typedef struct SampleQueue{
-    SampleInfo* head;
-    SampleInfo* tail;
-    int length;
-    int channel;
-    int delayvar;
-} SampleQueue;
+extern void init_Sample_Playback( Uint16 format,Uint32 rate);
+
+extern void close_Sample_Playback();
+
+typedef struct hsh_QueueEntry{
+    hsh_aSource* hsh_src;
+    Sound_Sample* sample;
+    int16_t loops;
+    int32_t mtime;
+    struct hsh_QueueEntry* next;
+} hsh_QueueEntry;
+
+typedef struct hsh_SampleQueue{
+    hsh_QueueEntry* head;
+    hsh_QueueEntry* tail;
+    ALuint current;
+    int8_t length;
+    int32_t delayvar;
+} hsh_SampleQueue;
 
 int queue_Count; 
 
@@ -85,8 +95,9 @@ int queue_Count;
 - Initialse a SampleQueue and return a pointer to it
 - samples in the queue are played on thier own channel, meaning other samples can be played without disturbing the queue
 */
-SampleQueue* init_Queue();
-void free_Queue(SampleQueue* sq);
+extern hsh_SampleQueue* hsh_initQueue();
+
+extern void hsh_freeQueue(hsh_SampleQueue* sq);
 /*
 push sample to queue, plays after all samples pushed before it.
 - file: file location of the sample
@@ -96,11 +107,11 @@ sample may end before mtime has elapsed if it (and its loops) are shorter than m
   -1 will let sample play out entirely.
 - returns queue position on sucess, -1 on failure.
 */
-int enqueue_Sample(const char* file, int mtime, SampleQueue* sq);
+extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample, int32_t mtime, int16_t loops ,hsh_aSource* hsh_src);
 
-int enqueue_Delay(int time, SampleQueue* sq);
+extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
 
-void dequeue_Sample(SampleQueue* sq);
+extern uint8_t hsh_dequeueSample(hsh_SampleQueue* sq);
 
 /*
 Handles playing from a given SampleQueue
@@ -108,7 +119,8 @@ Handles playing from a given SampleQueue
 if the queue is not empty nothing the queue is playing is playing
 - Then dequeue it
 */
-void handle_Queue(SampleQueue* sq);
+void hsh_handleQueue(hsh_SampleQueue* sq);
 
-void printf_Q(SampleQueue* sq);
+void printf_Q(hsh_SampleQueue* sq);
+
 #endif

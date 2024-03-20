@@ -188,27 +188,61 @@ int main(){
 */
 
 #include "sample_func.h"
+#include "math.h"
+#include "stdio.h"
+#include "time.h"
+
+#define QUIT_CHECK if(SDL_QuitRequested()){break;}
+
+
+//#define M_PI                         (3.14159265358979323846)
+
+
 
 int main(){
 
     SDL_Init(SDL_INIT_AUDIO);
     init_Sample_Playback(AUDIO_S16,44100);
 
-    ALCcontext* c = alcCreateContext(get_AudioDevice(),NULL);
+    ALCint attrs[] = {ALC_HRTF_SOFT,ALC_TRUE,0};
+
+    ALCcontext* c = alcCreateContext(get_AudioDevice(),attrs);
     alcMakeContextCurrent(c);
 
-    hush_Vector3 pos = {0,0,0};
-    hush_AudioSource* src = hush_init_Source(SOURCE_PITCH_DEFAULT,SOURCE_GAIN_DEFAULT,pos,pos);
+    hsh_vec3 pos = {0,0,0};
+    hsh_vec3 player = {0,0,0};
+    hsh_vec3 vel = {0,0,0};
+    alListener3f(AL_POSITION,player.x,player.y,player.z);
+    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+    printf("x:%f,y:%f,z:%f\n",pos.x,pos.y,pos.z);
+    hsh_aSource* src = hush_init_Source(1.f,1.f,pos,vel);
 
-    hush_playSoundAtSource("jazz.wav",src,1);
 
-    ALint state = AL_PLAYING;
+    ALint hrtf_state;
+    ALint state;
+        /* Check if HRTF is enabled, and show which is being used. */
+    alcGetIntegerv(get_AudioDevice(), ALC_HRTF_SOFT, 1, &hrtf_state);
+    if(!hrtf_state)
+        printf("HRTF not enabled!\n");
+    else{
+        const ALchar *name = alcGetString(get_AudioDevice(), ALC_HRTF_SPECIFIER_SOFT);
+        printf("HRTF enabled, using %s\n", name);
+    }
+   
+   // alSourcef(src->source, AL_MAX_DISTANCE, 50.f);
+    //alSourcei(src->source, AL_SOURCE_RELATIVE, AL_TRUE );
+    hsh_playSoundFromFile("jazz.wav",src,2,-1);
 
-    while(state == AL_PLAYING)
-    {
-        //printf("sound playing\n");
+    while(1){
+        QUIT_CHECK;
         feed_source(src);
-        alGetSourcei( src->source, AL_SOURCE_STATE, &state);
+        alGetSourcei(src->alSource,AL_SOURCE_STATE,&state);
+        if(src->state != HUSH_STATE_PLAYING)
+            hsh_playSoundFromFile("door.wav",src,2,-1);
+        else
+            printf("PLAYING\n");
+         SDL_Delay(10);
+       // aplayer.xlSourcePlay(src->source);
     }
 
     alcDestroyContext(c);
@@ -216,3 +250,4 @@ int main(){
     SDL_Quit();
 
 }
+

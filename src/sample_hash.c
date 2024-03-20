@@ -100,7 +100,6 @@ Entry* hash_lookup (const char* file){
     temp->file = file; 
     temp->next = NULL;
     temp->sample = Sound_NewSampleFromFile(file,get_DesiredAudioInfo(),BUFFER_SIZE);
-    temp->loops = 0;
     if(temp->sample == NULL){
         printf("Entry not added, ERROR: %s",SDL_GetError());
         free(temp);

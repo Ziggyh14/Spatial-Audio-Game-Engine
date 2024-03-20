@@ -2,106 +2,173 @@
 
 // Amount of queues initialised
 
-hush_AudioSource* hush_init_Source(ALfloat pitch,ALfloat gain,hush_Vector3 position,hush_Vector3 velocity){
+hsh_aSource* hush_init_Source(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity){
 
-    hush_AudioSource* hsh_src =  malloc(sizeof(hush_AudioSource));
-    alAssert(alGenSources(1,&(hsh_src->source)));
-    alAssert(alSourcef(hsh_src->source,AL_PITCH,pitch));
-    alAssert(alSourcef(hsh_src->source,AL_GAIN,gain));
-    alAssert(alSource3f(hsh_src->source,AL_POSITION,position.x,position.y,position.z));
-    alAssert(alSource3f(hsh_src->source,AL_VELOCITY,velocity.x,velocity.y,velocity.z));
+    hsh_aSource* hsh_src =  malloc(sizeof(hsh_aSource));
+    alAssert(alGenSources(1,&(hsh_src->alSource)));
+    alAssert(alSourcef(hsh_src->alSource,AL_PITCH,pitch));
+    alAssert(alSourcef(hsh_src->alSource,AL_GAIN,gain));
+    alAssert(alSource3f(hsh_src->alSource,AL_POSITION,position.x,position.y,position.z));
+    alAssert(alSource3f(hsh_src->alSource,AL_VELOCITY,velocity.x,velocity.y,velocity.z));
+    alSourcef(hsh_src->alSource, AL_REFERENCE_DISTANCE, SOURCE_REFERENCE_DEFAULT);
+    alSourcef(hsh_src->alSource, AL_ROLLOFF_FACTOR, SOURCE_ROLLOFF_DEFAULT);
+    //alAssert(alSourcei())
     
+    alAssert(alSourcei(hsh_src->alSource,AL_LOOPING,AL_FALSE));
+    hsh_src->buffers = (ALuint*) malloc(sizeof(ALuint)*NUM_BUFFERS);
+    hsh_src->b =0;
+    hsh_src->loc =0;
     
-    alAssert(alSourcei(hsh_src->source,AL_LOOPING,AL_FALSE));
-    
-
-    alAssert(alGenBuffers(NUM_BUFFERS,&(hsh_src->buffers)));
+    alAssert(alGenBuffers(NUM_BUFFERS,(hsh_src->buffers)));
+    alAssert(alSourceStop(hsh_src->alSource));
     printf("source created\n");
     return hsh_src;
 }
 
-extern int hush_playSoundAtSource(const char* file,hush_AudioSource* hsh_src,int16_t loops){
+extern void hsh_freeSource(hsh_aSource* hsh_src){
+
+}
+
+extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* hsh_src,int16_t loops, int32_t mtime){
 
     int i;
-    hsh_src->entry = hash_lookup(file);
+
     if(loops == -1)
         loops = INT16_MAX;
     
-    hsh_src->entry->loops = loops;
-    Sound_Sample* sample = hsh_src->entry->sample;
+    if(mtime == -1)
+        mtime = INT32_MAX;
+
+    hsh_src->mtime = mtime;
+    hsh_src->loops = loops;
+    hsh_src->sample = sample;
+
+    Sound_Rewind(hsh_src->sample);
+    alAssert(alSourcei(hsh_src->alSource,AL_BUFFER,NULL));
+
     for(i = 0;i<NUM_BUFFERS;i++){
         Uint32 size = Sound_Decode(sample);
-        void* data = calloc(BUFFER_SIZE,1);
-        memcpy(&data[0],sample->buffer,size);
-        
-        if(size<BUFFER_SIZE){
-            hsh_src->entry->loops--;
-            if(hsh_src->entry->loops>=0){
-                Sound_Rewind(sample);
-                Sound_SetBufferSize(sample, BUFFER_SIZE-size);
-                Sound_Decode(sample);
-                memcpy(&data[size],sample->buffer,BUFFER_SIZE-size);
-                Sound_SetBufferSize(sample, BUFFER_SIZE);
+        ALvoid* data = calloc(BUFFER_SIZE,1);
+        if(size >= hsh_src->mtime * hush_AI->bpms){
+            memcpy(&data[0],sample->buffer,hsh_src->mtime * hush_AI->bpms);
+            hsh_src->mtime = 0;
+        }
+        else{
+            memcpy(&data[0],sample->buffer,size);
+            hsh_src->mtime -= size / hush_AI->bpms;
+            if(size<BUFFER_SIZE){
+                hsh_src->loops--;
+                if(hsh_src->loops>=0){
+                    Sound_Rewind(sample);
+                    Sound_SetBufferSize(sample, BUFFER_SIZE-size);
+                    Sound_Decode(sample);
+                    memcpy(&data[size],sample->buffer,BUFFER_SIZE-size);
+                    hsh_src->mtime -= (BUFFER_SIZE-size) / hush_AI->bpms;
+                    Sound_SetBufferSize(sample, BUFFER_SIZE);
+                }
             }
         }
-        alAssert(alBufferData(hsh_src->buffers[i],AL_FORMAT_STEREO16,data,BUFFER_SIZE,sample->actual.rate));
+        alAssert(alBufferData(hsh_src->buffers[i],AL_FORMAT_MONO16,data,BUFFER_SIZE,sample->actual.rate));
         free(data);
     }    
 
-    alAssert(alSourceQueueBuffers(hsh_src->source,NUM_BUFFERS,&(hsh_src->buffers[0])));
-    alAssert(alSourcePlay(hsh_src->source));
+    alAssert(alSourceQueueBuffers(hsh_src->alSource,NUM_BUFFERS,&(hsh_src->buffers[0])));
+    alAssert(alSourcePlay(hsh_src->alSource));
     printf("sample playing\n");
     return 0;
 }
 
-extern void feed_source(hush_AudioSource* hsh_src){
-
-    int buffersProcessed = 0;
-    alAssert(alGetSourcei(hsh_src->source,AL_BUFFERS_PROCESSED,&buffersProcessed));
-
-    if(buffersProcessed<=0)
-        return;
-
-    while(buffersProcessed-- && hsh_src->entry->loops>=0){
-
-        ALuint buf;
-        alAssert(alSourceUnqueueBuffers(hsh_src->source,1,&buf))
-
-        void* data = calloc(BUFFER_SIZE,1);
-        Sound_Sample* sample = hsh_src->entry->sample;
-        Uint32 size = Sound_Decode(sample);
-        memcpy(&data[0],sample->buffer,size);
-        if(size<BUFFER_SIZE){
-            hsh_src->entry->loops--;
-            if(hsh_src->entry->loops>=0){
-
-                Sound_Rewind(sample);
-                Sound_SetBufferSize(sample, BUFFER_SIZE-size);
-                Sound_Decode(sample);
-                memcpy(&data[size],sample->buffer,BUFFER_SIZE-size);
-                Sound_SetBufferSize(sample, BUFFER_SIZE);
-            }
-        }      
-
-        alAssert(alBufferData(buf,AL_FORMAT_STEREO16,data,BUFFER_SIZE,sample->actual.rate));
-        alAssert(alSourceQueueBuffers(hsh_src->source,1,&buf));
-        free(data);
-    }
-
+extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops, int32_t mtime){
+  Entry* e = hash_lookup(file);
+  return hsh_playSound(e->sample,src,loops,mtime);
 }
 
+extern int hsh_pauseSource(hsh_aSource* src){
+
+    alAssert(alSourcePause(src->alSource));
+}
+
+extern int hsh_unpauseSource(hsh_aSource* src){
+
+    alAssert(alSourcePlay(src->alSource));
+}
+
+extern int8_t feed_source(hsh_aSource* hsh_src){
+
+    int buffersProcessed = 0;
+    alAssert(alGetSourcei(hsh_src->alSource,AL_BUFFERS_PROCESSED,&buffersProcessed));
+
+    if(hsh_src->mtime <= 0)
+        return 0;
+
+    if(buffersProcessed<=0)
+        return 0;
+
+    while(buffersProcessed-- && hsh_src->loops>=0){
+
+        ALuint buf;
+        alAssert(alSourceUnqueueBuffers(hsh_src->alSource,1,&buf))
+
+        ALvoid* data = calloc(BUFFER_SIZE,1);
+        Sound_Sample* sample = hsh_src->sample;
+        if(sample->flags == SOUND_SAMPLEFLAG_EOF){
+            
+            return 0;
+        }
+        Uint32 size = Sound_Decode(sample);
+        if(size >= hsh_src->mtime * hush_AI->bpms){
+            memcpy(&data[0],sample->buffer, hsh_src->mtime * hush_AI->bpms);
+            hsh_src->mtime = 0;
+        }
+        else{
+            memcpy(&data[0],sample->buffer,size);
+            hsh_src->mtime -= size / hush_AI->bpms;
+            if(size<BUFFER_SIZE){
+                hsh_src->loops--;
+                if(hsh_src->loops>=0){
+
+                    Sound_Rewind(sample);
+                    Sound_SetBufferSize(sample, BUFFER_SIZE-size);
+                    Sound_Decode(sample);
+                    memcpy(&data[size],sample->buffer,BUFFER_SIZE-size);
+                    hsh_src->mtime -= (BUFFER_SIZE-size) / hush_AI->bpms;
+                    Sound_SetBufferSize(sample, BUFFER_SIZE);
+                }
+            }    
+        }  
+
+        alAssert(alBufferData(buf,AL_FORMAT_MONO16,data,BUFFER_SIZE,sample->actual.rate));
+        alAssert(alSourceQueueBuffers(hsh_src->alSource,1,&buf));
+        free(data);
+    }
+    return 0;
+}
+
+extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos){
+    alAssert(alSource3f(hsh_src->alSource, AL_POSITION, pos.x,pos.y,pos.z));
+}
 
 void init_Sample_Playback(Uint16 format,Uint32 rate){ //todo make init variables parameters
     
     create_Table();
     Sound_Init();
+    ALCint attrs[] = {ALC_HRTF_SOFT,ALC_TRUE,0};
     ALCdevice* d = alcOpenDevice(NULL);
     hush_AI = malloc(sizeof(hush_AudioInfo));
     hush_AI->device = d;
     hush_AI->desired_Format = malloc(sizeof(Sound_AudioInfo));
-    hush_AI->desired_Format->channels = 2;
+    hush_AI->desired_Format->channels = 1;
     hush_AI->desired_Format->format   = format;
     hush_AI->desired_Format->rate     = rate;
+    if(hush_AI->desired_Format->format == AUDIO_S16){
+        // calculate in bytes per milisecond of samples
+        hush_AI->bpms = (((16 * hush_AI->desired_Format->channels * hush_AI->desired_Format->rate) / 8) / 1000);
+    }
+    if(hush_AI->desired_Format->format == AUDIO_S8){
+        // calculate in bytes per milisecond of samples
+        hush_AI->bpms = (((8 * hush_AI->desired_Format->channels * hush_AI->desired_Format->rate) / 8) / 1000);
+    }
+
     queue_Count = 0;
     printf("playback initialised\n");
 
@@ -112,6 +179,114 @@ void close_Sample_Playback(){
     Sound_Quit();
     alcCloseDevice(get_AudioDevice());
     delete_Table(); //delete the table
+}
+
+hsh_SampleQueue* hsh_initQueue(){
+
+    hsh_SampleQueue* sq = malloc(sizeof(hsh_SampleQueue));
+    sq->head = NULL;
+    sq->tail = NULL;
+    sq->length = 0;
+    sq->delayvar = 0;
+    sq->current = -1;
+
+    return sq;
+}
+
+void hsh_freeQueue(hsh_SampleQueue* sq){
+
+    hsh_QueueEntry* qe = sq->head;
+    hsh_QueueEntry* temp;
+    while(qe!=NULL){
+       temp = qe->next;
+       free(qe);
+       qe = temp;
+    }
+    free(sq);
+    return;
+
+}
+
+uint8_t hsh_enqueueSample(hsh_SampleQueue* sq,Sound_Sample* sample, int32_t mtime, int16_t loops ,hsh_aSource* hsh_src){
+
+    hsh_QueueEntry* qe = malloc(sizeof(hsh_QueueEntry));
+    qe->hsh_src = hsh_src;
+    qe->mtime = mtime;
+    qe->loops = loops;
+    qe->sample = sample;
+    qe->next = NULL;
+
+    if(sq->head != NULL){
+        sq->tail->next = qe;
+        sq->tail = qe;
+    }
+    else{
+        sq->head = qe;
+        sq->tail = qe;
+    }
+    return ++(sq->length);
+}
+
+int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq){
+    hsh_QueueEntry* qe = malloc(sizeof(hsh_QueueEntry));
+    qe->hsh_src = NULL;
+    qe->sample = NULL;
+    qe->mtime = time;
+    qe->next = NULL;
+
+    if(sq->head != NULL){
+        sq->tail->next = qe;
+        sq->tail = qe;
+    }
+    else{
+        sq->head = qe;
+        sq->tail = qe;
+    }
+    return ++(sq->length);
+}
+
+uint8_t hsh_dequeueSample(hsh_SampleQueue* sq){
+
+    hsh_QueueEntry* qe = sq->head;
+    sq->head = qe->next;
+    free(qe);
+    return --(sq->length);
+}
+
+void hsh_handleQueue(hsh_SampleQueue* sq){
+
+    if(sq->head == NULL)
+        return;
+
+    if(sq->head->hsh_src == NULL){
+
+        sq->delayvar += sq->head->mtime;
+        hsh_dequeueSample(sq);
+        hsh_handleQueue(sq);
+    }
+
+    ALint state;
+    alAssert(alGetSourcei(sq->head->hsh_src->alSource,AL_SOURCE_STATE,&state));
+    
+    if(state == AL_PLAYING && sq->current == sq->head->hsh_src->alSource){
+        feed_source(sq->head->hsh_src);
+    }
+
+    if(state == AL_PLAYING && sq->current != sq->head->hsh_src->alSource){
+        sq->current = sq->head->hsh_src->alSource;
+        hsh_playSound(sq->head->sample,sq->head->hsh_src,sq->head->loops,sq->head->mtime);
+    }
+
+    if(state == AL_STOPPED && sq->current == sq->head->hsh_src->alSource){
+        hsh_dequeueSample(sq);
+        hsh_handleQueue(sq);
+    }
+    if(state == AL_STOPPED && sq->current != sq->head->hsh_src->alSource){
+        sq->current = sq->head->hsh_src->alSource;
+        hsh_playSound(sq->head->sample,sq->head->hsh_src,sq->head->loops,sq->head->mtime);
+    }
+
+
 }
 
 
