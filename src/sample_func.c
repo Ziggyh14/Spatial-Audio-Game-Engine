@@ -238,6 +238,17 @@ uint8_t hsh_enqueueSample(hsh_SampleQueue* sq,Sound_Sample* sample, int32_t mtim
     return ++(sq->length);
 }
 
+extern uint8_t hsh_enqueueSampleFromFile(const char* file,
+                                         hsh_SampleQueue* sq, 
+                                         int32_t mtime, 
+                                         int16_t loops,
+                                         hsh_aSource* hsh_src)
+{
+
+    Entry* e = hash_lookup(file);
+    return hsh_enqueueSample(sq, e->sample,mtime,loops,hsh_src);
+}
+
 int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq){
     hsh_QueueEntry* qe = malloc(sizeof(hsh_QueueEntry));
     qe->hsh_src = NULL;

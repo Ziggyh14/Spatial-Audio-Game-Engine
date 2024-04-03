@@ -230,11 +230,13 @@ int main(){
     }
    
     hsh_SampleQueue* q = hsh_initQueue();
-  //  hsh_enqueueSampleFromFile("door.wav",q,-1,1,src);
-  //  hsh_enqueueSampleFromFile("jazz.wav",q,-1,1,src);
+    hsh_enqueueSampleFromFile("door.wav",q,-1,1,src);
+    hsh_enqueueSampleFromFile("jazz.wav",q,-1,1,src);
 
-    hsh_playSoundFromFile("jazz.wav",src,2,-1);
-    while(1){
+    hsh_playSoundFromFile("jazz.wav",src,2,1000);
+    int i = 1000;
+    while(i > 0){
+        i -= 10;
         QUIT_CHECK;
         feed_source(src);
         alGetSourcei(src->alSource,AL_SOURCE_STATE,&state);
@@ -252,6 +254,11 @@ int main(){
         }
         SDL_Delay(5);
        // aplayer.xlSourcePlay(src->source);
+    }
+    while(1){
+        QUIT_CHECK;
+        hsh_handleQueue(q);
+        SDL_Delay(10);
     }
 
     alcDestroyContext(c);
