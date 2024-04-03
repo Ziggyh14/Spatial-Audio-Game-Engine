@@ -229,19 +229,28 @@ int main(){
         printf("HRTF enabled, using %s\n", name);
     }
    
-   // alSourcef(src->source, AL_MAX_DISTANCE, 50.f);
-    //alSourcei(src->source, AL_SOURCE_RELATIVE, AL_TRUE );
-    hsh_playSoundFromFile("jazz.wav",src,2,-1);
+    hsh_SampleQueue* q = hsh_initQueue();
+  //  hsh_enqueueSampleFromFile("door.wav",q,-1,1,src);
+  //  hsh_enqueueSampleFromFile("jazz.wav",q,-1,1,src);
 
+    hsh_playSoundFromFile("jazz.wav",src,2,-1);
     while(1){
         QUIT_CHECK;
         feed_source(src);
         alGetSourcei(src->alSource,AL_SOURCE_STATE,&state);
-        if(src->state != HUSH_STATE_PLAYING)
-            hsh_playSoundFromFile("door.wav",src,2,-1);
-        else
-            printf("PLAYING\n");
-         SDL_Delay(10);
+        switch(state){
+            case AL_PLAYING:
+                //printf("playing\n");
+                break;
+            case AL_INITIAL:
+                printf("initial\n");
+                break;
+            case AL_STOPPED:
+                printf("stopped\n");
+                return 0;
+                break;
+        }
+        SDL_Delay(5);
        // aplayer.xlSourcePlay(src->source);
     }
 

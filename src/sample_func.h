@@ -9,7 +9,7 @@
 #define alAssert(function) {function; if(alGetError() != ALC_NO_ERROR) printf("ALC ERROR\n"); }
 
 #define DEFAULT_CHANNEL_NO 16
-#define NUM_BUFFERS 4
+#define NUM_BUFFERS 8+1
 
 //Source defaults
 #define SOURCE_PITCH_DEFAULT 1
@@ -28,8 +28,7 @@ typedef struct hsh_aSource{
   Sound_Sample* sample;
   int16_t loops;
   int32_t mtime;
-  uint8_t b;
-  uint8_t loc;
+  int8_t buffer_n;
 } hsh_aSource;
 
 typedef struct hsh_vec3{
@@ -56,6 +55,8 @@ extern int play_Sample_Timed_inChannel(const char* file, int loops, int mtime,in
 #define play_Sample(file,loops) play_Sample_Timed_inChannel(file,loops,-1,-1);
 
 */
+
+extern ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* sample, ALuint n);
 
 extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* src,int16_t loops, int32_t mtime);
 
@@ -109,9 +110,17 @@ sample may end before mtime has elapsed if it (and its loops) are shorter than m
 */
 extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample, int32_t mtime, int16_t loops ,hsh_aSource* hsh_src);
 
+extern uint8_t hsh_enqueueSampleFromFile(const char* file,
+                                         hsh_SampleQueue* sq, 
+                                         int32_t mtime, 
+                                         int16_t loops,
+                                         hsh_aSource* hsh_src);
+
 extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
 
 extern uint8_t hsh_dequeueSample(hsh_SampleQueue* sq);
+
+
 
 /*
 Handles playing from a given SampleQueue
