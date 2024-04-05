@@ -40,7 +40,7 @@ extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* hsh_src,int16_t loops
     hsh_src->loops = loops;
     hsh_src->sample = sample;
 
-    //Sound_Rewind(hsh_src->sample);
+    Sound_Rewind(hsh_src->sample);
     alAssert(alSourcei(hsh_src->alSource,AL_BUFFER,NULL));
 
     /*
@@ -277,8 +277,9 @@ uint8_t hsh_dequeueSample(hsh_SampleQueue* sq){
 
 void hsh_handleQueue(hsh_SampleQueue* sq){
 
-    if(sq->head == NULL)
+    if(!(sq->head)){
         return;
+    }
 
     if(sq->head->hsh_src == NULL){
 
@@ -291,24 +292,32 @@ void hsh_handleQueue(hsh_SampleQueue* sq){
     alAssert(alGetSourcei(sq->head->hsh_src->alSource,AL_SOURCE_STATE,&state));
     
     if(state == AL_PLAYING && sq->current == sq->head->hsh_src->alSource){
+       
         feed_source(sq->head->hsh_src);
+        return;
+    }
+
+    if((state == AL_STOPPED || state == AL_INITIAL) && sq->current == sq->head->hsh_src->alSource){
+        
+        hsh_dequeueSample(sq);
+        sq->current = -1;
+        hsh_handleQueue(sq);
+        return;
     }
 
     if(state == AL_PLAYING && sq->current != sq->head->hsh_src->alSource){
+        
         sq->current = sq->head->hsh_src->alSource;
         hsh_playSound(sq->head->sample,sq->head->hsh_src,sq->head->loops,sq->head->mtime);
+        return;
     }
 
-    if(state == AL_STOPPED && sq->current == sq->head->hsh_src->alSource){
-        hsh_dequeueSample(sq);
-        hsh_handleQueue(sq);
-    }
-    if(state == AL_STOPPED && sq->current != sq->head->hsh_src->alSource){
+    if((state == AL_STOPPED || state == AL_INITIAL)&& sq->current != sq->head->hsh_src->alSource){
+        
         sq->current = sq->head->hsh_src->alSource;
         hsh_playSound(sq->head->sample,sq->head->hsh_src,sq->head->loops,sq->head->mtime);
+        return;
     }
-
-
 }
 
 

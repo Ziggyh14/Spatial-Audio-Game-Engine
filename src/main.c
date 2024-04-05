@@ -228,13 +228,12 @@ int main(){
         const ALchar *name = alcGetString(get_AudioDevice(), ALC_HRTF_SPECIFIER_SOFT);
         printf("HRTF enabled, using %s\n", name);
     }
-   
+    
     hsh_SampleQueue* q = hsh_initQueue();
-    hsh_enqueueSampleFromFile("door.wav",q,-1,1,src);
-    hsh_enqueueSampleFromFile("jazz.wav",q,-1,1,src);
+    hsh_enqueueSampleFromFile("door.wav",q,-1,-1,src);
+    hsh_enqueueSampleFromFile("jazz.wav",q,-1,0,src);
 
-    hsh_playSoundFromFile("jazz.wav",src,2,1000);
-    int i = 1000;
+    int i = 100;
     while(i > 0){
         i -= 10;
         QUIT_CHECK;
@@ -252,8 +251,7 @@ int main(){
                 return 0;
                 break;
         }
-        SDL_Delay(5);
-       // aplayer.xlSourcePlay(src->source);
+        SDL_Delay(10);
     }
     while(1){
         QUIT_CHECK;
