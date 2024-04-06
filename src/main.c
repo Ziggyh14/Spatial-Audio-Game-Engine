@@ -215,7 +215,7 @@ int main(){
     alListener3f(AL_POSITION,player.x,player.y,player.z);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     printf("x:%f,y:%f,z:%f\n",pos.x,pos.y,pos.z);
-    hsh_aSource* src = hush_initSource(1.f,1.f,pos,vel);
+    hsh_aSource* src = hsh_initSource(1.f,1.f,pos,vel);
 
 
     ALint hrtf_state;

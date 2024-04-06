@@ -1,8 +1,7 @@
 #include "sample_func.h"
 
-// Amount of queues initialised
 
-hsh_aSource* hush_initSource(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity){
+hsh_aSource* hsh_initSource(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity){
 
     hsh_aSource* hsh_src =  malloc(sizeof(hsh_aSource));
     alAssert(alGenSources(1,&(hsh_src->alSource)));
@@ -12,8 +11,7 @@ hsh_aSource* hush_initSource(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_ve
     alAssert(alSource3f(hsh_src->alSource,AL_VELOCITY,velocity.x,velocity.y,velocity.z));
     alSourcef(hsh_src->alSource, AL_REFERENCE_DISTANCE, SOURCE_REFERENCE_DEFAULT);
     alSourcef(hsh_src->alSource, AL_ROLLOFF_FACTOR, SOURCE_ROLLOFF_DEFAULT);
-    //alAssert(alSourcei())
-    
+
     alAssert(alSourcei(hsh_src->alSource,AL_LOOPING,AL_FALSE));
     hsh_src->buffers = (ALuint*) malloc(sizeof(ALuint)*NUM_BUFFERS);
     
@@ -131,6 +129,7 @@ extern int hsh_unpauseSource(hsh_aSource* src){
 
 extern int8_t hsh_feedSource(hsh_aSource* hsh_src){
 
+    int i;
     int buffersProcessed = 0;
     alAssert(alGetSourcei(hsh_src->alSource,AL_BUFFERS_PROCESSED,&buffersProcessed));
 
@@ -140,11 +139,11 @@ extern int8_t hsh_feedSource(hsh_aSource* hsh_src){
     while(buffersProcessed--){
         ALuint buf;
         alAssert(alSourceUnqueueBuffers(hsh_src->alSource, 1, &buf));
-        int i = hsh_bufferMath(hsh_src, &buf, hsh_src->sample, 1);
+        i = hsh_bufferMath(hsh_src, &buf, hsh_src->sample, 1);
         alAssert(alSourceQueueBuffers(hsh_src->alSource,i,&buf));
     }
 
-    return 0;
+    return i;
 }
 
 extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos){
