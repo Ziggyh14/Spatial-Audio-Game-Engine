@@ -108,13 +108,14 @@ sample may end before mtime has elapsed if it (and its loops) are shorter than m
   -1 will let sample play out entirely.
 - returns queue position on sucess, -1 on failure.
 */
-extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample, int32_t mtime, int16_t loops ,hsh_aSource* hsh_src);
+extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample,hsh_aSource* hsh_src, int16_t loops, int32_t mtime);
 
 extern uint8_t hsh_enqueueSampleFromFile(const char* file,
                                          hsh_SampleQueue* sq, 
-                                         int32_t mtime, 
+                                         hsh_aSource* hsh_src,
                                          int16_t loops,
-                                         hsh_aSource* hsh_src);
+                                         int32_t mtime
+                                         );
 
 extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
 

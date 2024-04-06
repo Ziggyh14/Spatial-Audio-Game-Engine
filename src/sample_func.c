@@ -218,7 +218,7 @@ void hsh_freeQueue(hsh_SampleQueue* sq){
 
 }
 
-uint8_t hsh_enqueueSample(hsh_SampleQueue* sq,Sound_Sample* sample, int32_t mtime, int16_t loops ,hsh_aSource* hsh_src){
+extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample,hsh_aSource* hsh_src, int16_t loops, int32_t mtime){
 
     hsh_QueueEntry* qe = malloc(sizeof(hsh_QueueEntry));
     qe->hsh_src = hsh_src;
@@ -240,13 +240,14 @@ uint8_t hsh_enqueueSample(hsh_SampleQueue* sq,Sound_Sample* sample, int32_t mtim
 
 extern uint8_t hsh_enqueueSampleFromFile(const char* file,
                                          hsh_SampleQueue* sq, 
-                                         int32_t mtime, 
+                                         hsh_aSource* hsh_src,
                                          int16_t loops,
-                                         hsh_aSource* hsh_src)
+                                         int32_t mtime
+                                         )
 {
 
     Entry* e = hash_lookup(file);
-    return hsh_enqueueSample(sq, e->sample,mtime,loops,hsh_src);
+    return hsh_enqueueSample(sq, e->sample,hsh_src,loops,mtime);
 }
 
 int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq){
