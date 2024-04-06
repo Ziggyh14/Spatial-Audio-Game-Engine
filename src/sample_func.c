@@ -163,7 +163,7 @@ void init_Sample_Playback(Uint16 format,Uint32 rate){ //todo make init variables
     
     create_Table();
     Sound_Init();
-    ALCint attrs[] = {ALC_HRTF_SOFT,ALC_TRUE,0};
+    
     ALCdevice* d = alcOpenDevice(NULL);
     hush_AI = malloc(sizeof(hush_AudioInfo));
     hush_AI->device = d;
@@ -179,6 +179,10 @@ void init_Sample_Playback(Uint16 format,Uint32 rate){ //todo make init variables
         // calculate in bytes per milisecond of samples
         hush_AI->bpms = (((8 * hush_AI->desired_Format->channels * hush_AI->desired_Format->rate) / 8) / 1000);
     }
+
+    ALCint attrs[] = {ALC_HRTF_SOFT,ALC_TRUE,0};
+    ALCcontext* c = alcCreateContext(get_AudioDevice(),attrs);
+    alcMakeContextCurrent(c);
 
     queue_Count = 0;
     printf("playback initialised\n");

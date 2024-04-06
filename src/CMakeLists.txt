@@ -15,6 +15,7 @@ add_executable(out main.c
         collision_util.c
         sample_hash.c
         sample_func.c
+        sample_queue.c
 
         )
 
