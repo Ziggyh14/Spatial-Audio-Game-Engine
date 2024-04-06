@@ -202,7 +202,7 @@ int main(){
 int main(){
 
     SDL_Init(SDL_INIT_AUDIO);
-    init_Sample_Playback(AUDIO_S16,44100);
+    hsh_initSamplePlayback(AUDIO_S16,44100);
 
     ALCint attrs[] = {ALC_HRTF_SOFT,ALC_TRUE,0};
 
@@ -215,7 +215,7 @@ int main(){
     alListener3f(AL_POSITION,player.x,player.y,player.z);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     printf("x:%f,y:%f,z:%f\n",pos.x,pos.y,pos.z);
-    hsh_aSource* src = hush_init_Source(1.f,1.f,pos,vel);
+    hsh_aSource* src = hush_initSource(1.f,1.f,pos,vel);
 
 
     ALint hrtf_state;
@@ -237,7 +237,7 @@ int main(){
     while(i > 0){
         i -= 10;
         QUIT_CHECK;
-        feed_source(src);
+        hsh_feedSource(src);
         alGetSourcei(src->alSource,AL_SOURCE_STATE,&state);
         switch(state){
             case AL_PLAYING:
@@ -260,7 +260,7 @@ int main(){
     }
 
     alcDestroyContext(c);
-    close_Sample_Playback();
+    hsh_closeSamplePlayback();
     SDL_Quit();
 
 }

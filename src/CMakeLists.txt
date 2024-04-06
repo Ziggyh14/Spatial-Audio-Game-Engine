@@ -16,7 +16,6 @@ add_executable(out main.c
         sample_hash.c
         sample_func.c
         sample_queue.c
-
         )
 
 target_include_directories(out PUBLIC ${CMAKE_SOURCE_DIR}/src)

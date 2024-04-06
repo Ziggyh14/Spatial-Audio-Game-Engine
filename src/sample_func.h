@@ -28,14 +28,13 @@ typedef struct hsh_aSource{
   Sound_Sample* sample;
   int16_t loops;
   int32_t mtime;
-  int8_t buffer_n;
 } hsh_aSource;
 
 typedef struct hsh_vec3{
 	float x,y,z;
 } hsh_vec3;
 
-extern hsh_aSource* hush_init_Source(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity);
+extern hsh_aSource* hush_initSource(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity);
 
 extern void hsh_freeSource(hsh_aSource* hsh_src);
 
@@ -66,71 +65,13 @@ extern int hsh_pauseSource(hsh_aSource* src);
 
 extern int hsh_unpauseSource(hsh_aSource* src);
 
-extern int8_t feed_source(hsh_aSource* hsh_src);
+extern int8_t hsh_feedSource(hsh_aSource* hsh_src);
 
 extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos);
 
-extern void init_Sample_Playback( Uint16 format,Uint32 rate);
+extern void hsh_initSamplePlayback( Uint16 format,Uint32 rate);
 
-extern void close_Sample_Playback();
+extern void hsh_closeSamplePlayback();
 
-typedef struct hsh_QueueEntry{
-    hsh_aSource* hsh_src;
-    Sound_Sample* sample;
-    int16_t loops;
-    int32_t mtime;
-    struct hsh_QueueEntry* next;
-} hsh_QueueEntry;
-
-typedef struct hsh_SampleQueue{
-    hsh_QueueEntry* head;
-    hsh_QueueEntry* tail;
-    ALuint current;
-    int8_t length;
-    int32_t delayvar;
-} hsh_SampleQueue;
-
-int queue_Count; 
-
-/*
-- Initialse a SampleQueue and return a pointer to it
-- samples in the queue are played on thier own channel, meaning other samples can be played without disturbing the queue
-*/
-extern hsh_SampleQueue* hsh_initQueue();
-
-extern void hsh_freeQueue(hsh_SampleQueue* sq);
-/*
-push sample to queue, plays after all samples pushed before it.
-- file: file location of the sample
-- mtime: max time a sample will play until it is cut off. 
-- queue to push to (array of string constants)
-sample may end before mtime has elapsed if it (and its loops) are shorter than mtime
-  -1 will let sample play out entirely.
-- returns queue position on sucess, -1 on failure.
-*/
-extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample,hsh_aSource* hsh_src, int16_t loops, int32_t mtime);
-
-extern uint8_t hsh_enqueueSampleFromFile(const char* file,
-                                         hsh_SampleQueue* sq, 
-                                         hsh_aSource* hsh_src,
-                                         int16_t loops,
-                                         int32_t mtime
-                                         );
-
-extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
-
-extern uint8_t hsh_dequeueSample(hsh_SampleQueue* sq);
-
-
-
-/*
-Handles playing from a given SampleQueue
-- Will play the next sample in the queue 
-if the queue is not empty nothing the queue is playing is playing
-- Then dequeue it
-*/
-void hsh_handleQueue(hsh_SampleQueue* sq);
-
-void printf_Q(hsh_SampleQueue* sq);
 
 #endif
