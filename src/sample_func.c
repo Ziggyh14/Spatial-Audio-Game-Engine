@@ -1,4 +1,5 @@
 #include "sample_func.h"
+#include "math.h"
 
 
 hsh_aSource* hsh_initSource(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity){
@@ -148,6 +149,30 @@ extern int8_t hsh_feedSource(hsh_aSource* hsh_src){
 
 extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos){
     alAssert(alSource3f(hsh_src->alSource, AL_POSITION, pos.x,pos.y,pos.z));
+}
+
+extern int hsh_rotateListener(float pitch,float yaw){
+
+    float or[] = {0.,0.,1.,0.,1.,0.};
+
+    //convert to radians
+
+    pitch = (pitch) * (M_PI/180);
+    yaw   = (yaw) * (M_PI/180);
+
+    // FORWARD / AT VECTOR
+    or[0] = (sin(yaw)*cos(pitch));
+    or[1] = -sin(pitch);
+    or[2] = (cos(yaw) * cos(pitch));
+
+    //UP VECTOR
+
+    or[3] = sin(yaw) * sin(pitch);
+    or[4] = cos(pitch);
+    or[5] = cos(yaw) * sin(pitch);
+
+
+    alAssert(alListenerfv(AL_ORIENTATION,or));
 }
 
 void hsh_initSamplePlayback(Uint16 format,Uint32 rate){ //todo make init variables parameters

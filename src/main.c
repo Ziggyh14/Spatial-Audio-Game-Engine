@@ -230,15 +230,22 @@ int main(){
     }
     
     hsh_SampleQueue* q = hsh_initQueue();
-    hsh_enqueueSampleFromFile("door.wav",q,src,-1,-1);
-    hsh_enqueueSampleFromFile("jazz.wav",q,src,-1,0);
+    hsh_enqueueSampleFromFile("c.wav",q,src,-1,-1);
 
     int i = 100;
+
+    hsh_moveSource(src,(hsh_vec3){1,0,0});
+    float pitch,yaw;
+    pitch = 0;
+    yaw = 0;
+    hsh_rotateListener(pitch,yaw);
 
     while(1){
         QUIT_CHECK;
         hsh_handleQueue(q);
-        SDL_Delay(10);
+        hsh_rotateListener(pitch,yaw++);
+        //printf("yaw %f",yaw);
+        SDL_Delay(50);
     }
 
     alcDestroyContext(c);

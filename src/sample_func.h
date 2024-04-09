@@ -13,7 +13,8 @@
 #define alAssert(function) {function; if(alGetError() != ALC_NO_ERROR) printf("ALC ERROR\n"); }
 
 #define DEFAULT_CHANNEL_NO 16
-#define NUM_BUFFERS 8+1
+#define NUM_BUFFERS 8
+#define M_PI 3.14159265358979323846
 
 //Source defaults
 #define SOURCE_PITCH_DEFAULT 1
@@ -28,11 +29,11 @@
 
 typedef struct hsh_aSource{
 	ALuint alSource;
-	ALuint* buffers;
-  Sound_Sample* sample;
-  int16_t loops;
-  int32_t mtime;
-} hsh_aSource;
+    ALuint* buffers;
+    Sound_Sample* sample;
+    int16_t loops;
+    int32_t mtime;
+}   hsh_aSource;
 
 typedef struct hsh_vec3{
 	float x,y,z;
@@ -162,6 +163,8 @@ extern int hsh_unpauseSource(hsh_aSource* src);
 extern int8_t hsh_feedSource(hsh_aSource* hsh_src);
 
 extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos);
+
+extern int hsh_rotateListener(float pitch, float yaw);
 
 extern void hsh_initSamplePlayback( Uint16 format,Uint32 rate);
 
