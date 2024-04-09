@@ -1,8 +1,9 @@
 #include <SDL2/SDL.h>
-#include "sample_hash.h"
-#include "event_handler.h"
 
-
+#include "al.h"
+#include "alc.h"
+#include "alext.h"
+#include "SDL_sound.h"
 #ifndef SAMPLE_FUNC_H
 #define SAMPLE_FUNC_H
 
@@ -165,6 +166,133 @@ extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos);
 extern void hsh_initSamplePlayback( Uint16 format,Uint32 rate);
 
 extern void hsh_closeSamplePlayback();
+
+
+#endif
+
+#ifndef HASH_TABLE_H
+#define HASH_TABLE_H
+
+#define TABLE_CAPACITY 50
+#define BUFFER_SIZE 65536
+
+//Test for a hash table for allocated samples
+
+typedef struct Entry {
+    const char* file;
+    Sound_Sample* sample;
+    struct Entry* next;
+
+} Entry;
+
+typedef struct Table {
+    Entry** entries;
+    int capacity;
+    int size;
+
+} Table;
+
+typedef struct hush_AudioInfo{
+	
+	ALCdevice* device;
+	Sound_AudioInfo* desired_Format;
+    int32_t bpms;
+
+} hush_AudioInfo;
+
+Sound_AudioInfo* get_DesiredAudioInfo();
+ALCdevice* get_AudioDevice();
+
+hush_AudioInfo *hush_AI;
+
+Table* create_Table(void);
+
+void delete_Table();
+
+void free_Entry(Entry* e);
+
+/*
+Hashes filename and returns pointer to entry in hash table
+    -Creates and entry is one doesnt exist.
+    -Finds and entry is it does already exist.
+    -Returns NULL if table hasnt been initialised, is at max capacity, or sample couldnt be loaded
+*/
+Entry* hash_lookup (const char* file);
+
+/*
+Simple Implementation of a djb2 hash function returns hash from given string.
+*/
+unsigned long djb2_hash(const char *str);
+
+void print_ht();
+
+//audio info
+
+
+#endif
+
+#ifndef SAMPLE_Q_H
+#define SAMPLE_Q_H
+
+#include "sample_func.h"
+
+
+typedef struct hsh_QueueEntry{
+    hsh_aSource* hsh_src;
+    Sound_Sample* sample;
+    int16_t loops;
+    int32_t mtime;
+    struct hsh_QueueEntry* next;
+} hsh_QueueEntry;
+
+typedef struct hsh_SampleQueue{
+    hsh_QueueEntry* head;
+    hsh_QueueEntry* tail;
+    ALuint current;
+    int8_t length;
+    int32_t delayvar;
+} hsh_SampleQueue;
+
+/*
+- Initialse a SampleQueue and return a pointer to it
+- samples in the queue are played on thier own channel, meaning other samples can be played without disturbing the queue
+*/
+extern hsh_SampleQueue* hsh_initQueue();
+
+extern void hsh_freeQueue(hsh_SampleQueue* sq);
+/*
+push sample to queue, plays after all samples pushed before it.
+- file: file location of the sample
+- mtime: max time a sample will play until it is cut off. 
+- queue to push to (array of string constants)
+sample may end before mtime has elapsed if it (and its loops) are shorter than mtime
+  -1 will let sample play out entirely.
+- returns queue position on sucess, -1 on failure.
+*/
+extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample,hsh_aSource* hsh_src, int16_t loops, int32_t mtime);
+
+extern uint8_t hsh_enqueueSampleFromFile(const char* file,
+                                         hsh_SampleQueue* sq, 
+                                         hsh_aSource* hsh_src,
+                                         int16_t loops,
+                                         int32_t mtime
+                                         );
+
+extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
+
+extern uint8_t hsh_dequeueSample(hsh_SampleQueue* sq);
+
+
+
+/*
+Handles playing from a given SampleQueue
+- Will play the next sample in the queue 
+if the queue is not empty nothing the queue is playing is playing
+- Then dequeue it
+*/
+void hsh_handleQueue(hsh_SampleQueue* sq);
+
+void printf_Q(hsh_SampleQueue* sq);
 
 
 #endif

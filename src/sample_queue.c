@@ -1,4 +1,4 @@
-#include "sample_queue.h"
+#include "sample_func.h"
 
 hsh_SampleQueue* hsh_initQueue(){
 

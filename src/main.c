@@ -187,8 +187,7 @@ int main(){
 }
 */
 
-#include "sample_func.h"
-#include "sample_queue.h"
+#include "hush.h"
 #include "math.h"
 #include "stdio.h"
 #include "time.h"

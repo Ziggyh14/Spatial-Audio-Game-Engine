@@ -1,4 +1,4 @@
-#include "event_handler.h"
+#include "sdl_func.h"
 
 
 int isKeyDown(SDL_Event event){
