@@ -188,6 +188,7 @@ int main(){
 */
 
 #include "sample_func.h"
+#include "sample_queue.h"
 #include "math.h"
 #include "stdio.h"
 #include "time.h"
@@ -230,29 +231,11 @@ int main(){
     }
     
     hsh_SampleQueue* q = hsh_initQueue();
-    hsh_enqueueSampleFromFile("door.wav",q,-1,-1,src);
-    hsh_enqueueSampleFromFile("jazz.wav",q,-1,0,src);
+    hsh_enqueueSampleFromFile("door.wav",q,src,-1,-1);
+    hsh_enqueueSampleFromFile("jazz.wav",q,src,-1,0);
 
     int i = 100;
-    while(i > 0){
-        i -= 10;
-        QUIT_CHECK;
-        hsh_feedSource(src);
-        alGetSourcei(src->alSource,AL_SOURCE_STATE,&state);
-        switch(state){
-            case AL_PLAYING:
-                //printf("playing\n");
-                break;
-            case AL_INITIAL:
-                printf("initial\n");
-                break;
-            case AL_STOPPED:
-                printf("stopped\n");
-                return 0;
-                break;
-        }
-        SDL_Delay(10);
-    }
+
     while(1){
         QUIT_CHECK;
         hsh_handleQueue(q);
