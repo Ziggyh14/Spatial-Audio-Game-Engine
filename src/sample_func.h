@@ -10,7 +10,33 @@
 /**
  * used to assert an openAL function, and notify if there was on error
 */
-#define alAssert(function) {function; if(alGetError() != ALC_NO_ERROR) printf("ALC ERROR\n"); }
+#define alAssert(function,r) {function; if(alGetError() != ALC_NO_ERROR) {hsh_getALError(); return r;}}
+
+static void hsh_getALError(){
+
+    const char* s;
+    switch(alGetError()){
+        case AL_INVALID_NAME: 
+            s = "a bad name (ID) was passed to an OpenAL function";
+            break;
+        case AL_INVALID_ENUM:
+            s = "an invalid enum value was passed to an OpenAL function";
+            break;
+        case AL_INVALID_VALUE:
+            s = "an invalid value was passed to an OpenAL function";
+            break;
+        case AL_INVALID_OPERATION: 
+            s = "the requested operation is not valid";
+            break;
+        case AL_OUT_OF_MEMORY: 
+            s = "the requested operation resulted in OpenAL running out of memory";
+            break;
+        default:
+            s = "error not recognised";
+    }
+    fprintf(stderr, "OPENAL ERROR OCCURED! INFO: %s",s);
+    return;
+}
 
 #define DEFAULT_CHANNEL_NO 16
 #define NUM_BUFFERS 8
@@ -18,7 +44,7 @@
 
 //Source defaults
 #define SOURCE_PITCH_DEFAULT 1
-#define SOURCE_GAIN_DEFAULT  1.0f
+#define SOURCE_GAIN_DEFAULT  1.f
 #define SOURCE_POS_DEFAULT   {0,0,0}
 #define SOURCE_VEL_DEFAULT   {0,0,0}
 #define SOURCE_LOOP_DEFAULT  0
@@ -59,11 +85,12 @@ extern hsh_aSource* hsh_initSource(ALfloat pitch,ALfloat gain,hsh_vec3 position,
  * sources that have already stopped playback can still be freed
  * 
  *  \param hsh_src audio source to stop and free
+ *  \return 0 on failure, non-zero on success
  * 
  *  \sa hsh_initSource
  * 
 */
-extern void hsh_freeSource(hsh_aSource* hsh_src);
+extern int hsh_freeSource(hsh_aSource* hsh_src);
 
 /**
  * auxiliary function for hsh_playSound(..) and hsh_feedSource(..) and should not be used on its own and can be ignored. 
@@ -78,7 +105,7 @@ extern void hsh_freeSource(hsh_aSource* hsh_src);
  *  \param sample sample to retreive memory from
  *  \param n number of buffers to try to write to
  * 
- *  \return number of buffers sucessfully written to, likely used to queue to the corresponding openAL source
+ *  \return number of buffers sucessfully written to, likely used to queue to the corresponding openAL source. negative on fatal error
  * 
  *  \sa hsh_feedSource 
  *  \sa hsh_playSound
@@ -104,7 +131,7 @@ extern ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sampl
  *               sample will play until the sample finishes (loops included) or until mtime elsapses, whichever is soonest.
  *               mtime = 1000 will play the sample for a maximum of 1000 milliseconds
  *               mtime = -1 will play the sample for its entire duration (loops times) 
- *  \return uhhhh
+ *  \return 0 on failure, non-zero on success
  * 
  *  \sa hsh_feedSource 
  *  \sa hsh_playSoundFromFile
@@ -125,7 +152,7 @@ extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* src,int16_t loops, in
  *               sample will play until the sample finishes (loops included) or until mtime elsapses, whichever is soonest.
  *               mtime = 1000 will play the sample for a maximum of 1000 milliseconds
  *               mtime = -1 will play the sample for its entire duration (loops times) 
- *  \return uhhhh
+ *  \return 0 on failure, non-zero on success
  * 
  *  \sa hsh_playSound
 */
@@ -135,6 +162,7 @@ extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops
  * pauses playback at source, can be resumed with hsh_unpauseSource
  * 
  *  \param src audio source to pause playback at
+ *  \return 0 on failure, non-zero on success
  * 
  *  \sa hsh_unpauseSource
 */
@@ -144,6 +172,7 @@ extern int hsh_pauseSource(hsh_aSource* src);
  * resumes playback at source if paused by hsh_pauseSource, otherwise has no effect
  * 
  * \param src audio source to resume playback at
+ * \return 0 on failure, non-zero on success
  * 
  * \sa hsh_pauseSource
 */
@@ -156,15 +185,43 @@ extern int hsh_unpauseSource(hsh_aSource* src);
  * If safe to call every frame in a while loop, will only act with there are spent buffers to unqueued and more sample data to be queued in
  * 
  *  \param hsh_src source to feed more sample data into
- *  \return number of new buffers just queued to be played at source
+ *  \return number of new buffers just queued to be played at source. negative on fatal error
  *  
  *  \sa hsh_playSound
 */
 extern int8_t hsh_feedSource(hsh_aSource* hsh_src);
 
+/**
+ * moves the spatial location of the source to the given position (as hsh_vec3)
+ * 
+ * \param hsh_src audio source to move to position
+ * \param pos position to move audio source to
+ * 
+ * \return 0 on failure, non-zero on success
+*/
 extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos);
 
+/**
+ * rotates the listener/player at its current position.
+ * Takes two floating point angles (in degrees) pitch and yaw.
+ * Follows a right hand coordinate system: the z axis points towards the screen, the x axis to the side and the y axis up).
+ * Rotation is clockwise.
+ * 
+ * \param pitch the pitch value represents rotation along the x axis. Modelling with the head of the player
+ * it would be equivalent to looking up and down. It is clockwise going down s.t a value of 90 will face the listener directly downwards
+ * 
+ * \param yaw the yaw value represents rotation along the y aixs. Modelling with the head of the player
+ * it would be equivalient to looking left and right. It goes clockwise s.t a value of 90 will face the listener directly right looking at the negative x axis
+ * 
+ * \return 0 on failure, non-zero on success
+ * 
+ * \sa hsh_setListenerPosition
+*/
 extern int hsh_rotateListener(float pitch, float yaw);
+
+extern int hsh_setListenerPos(hsh_vec3 pos);
+
+extern hsh_vec3* hsh_getListenerPos(void);
 
 extern void hsh_initSamplePlayback( Uint16 format,Uint32 rate);
 
@@ -272,14 +329,17 @@ sample may end before mtime has elapsed if it (and its loops) are shorter than m
   -1 will let sample play out entirely.
 - returns queue position on sucess, -1 on failure.
 */
-extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq, Sound_Sample* sample,hsh_aSource* hsh_src, int16_t loops, int32_t mtime);
+extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq,
+                                 Sound_Sample* sample,
+                                 hsh_aSource* hsh_src, 
+                                 int16_t loops, 
+                                 int32_t mtime);
 
 extern uint8_t hsh_enqueueSampleFromFile(const char* file,
                                          hsh_SampleQueue* sq, 
                                          hsh_aSource* hsh_src,
                                          int16_t loops,
-                                         int32_t mtime
-                                         );
+                                         int32_t mtime);
 
 extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
 
@@ -293,7 +353,7 @@ Handles playing from a given SampleQueue
 if the queue is not empty nothing the queue is playing is playing
 - Then dequeue it
 */
-void hsh_handleQueue(hsh_SampleQueue* sq);
+int hsh_handleQueue(hsh_SampleQueue* sq);
 
 void printf_Q(hsh_SampleQueue* sq);
 

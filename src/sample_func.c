@@ -5,28 +5,32 @@
 hsh_aSource* hsh_initSource(ALfloat pitch,ALfloat gain,hsh_vec3 position,hsh_vec3 velocity){
 
     hsh_aSource* hsh_src =  malloc(sizeof(hsh_aSource));
-    alAssert(alGenSources(1,&(hsh_src->alSource)));
-    alAssert(alSourcef(hsh_src->alSource,AL_PITCH,pitch));
-    alAssert(alSourcef(hsh_src->alSource,AL_GAIN,gain));
-    alAssert(alSource3f(hsh_src->alSource,AL_POSITION,position.x,position.y,position.z));
-    alAssert(alSource3f(hsh_src->alSource,AL_VELOCITY,velocity.x,velocity.y,velocity.z));
-    alSourcef(hsh_src->alSource, AL_REFERENCE_DISTANCE, SOURCE_REFERENCE_DEFAULT);
-    alSourcef(hsh_src->alSource, AL_ROLLOFF_FACTOR, SOURCE_ROLLOFF_DEFAULT);
+    alAssert(
+        alGenSources(1,&(hsh_src->alSource));
+        alSourcef(hsh_src->alSource,AL_PITCH,pitch);
+        alSourcef(hsh_src->alSource,AL_GAIN,gain);
+        alSource3f(hsh_src->alSource,AL_POSITION,position.x,position.y,position.z);
+        alSource3f(hsh_src->alSource,AL_VELOCITY,velocity.x,velocity.y,velocity.z),NULL);
 
-    alAssert(alSourcei(hsh_src->alSource,AL_LOOPING,AL_FALSE));
+    alAssert(
+        alSourcef(hsh_src->alSource, AL_REFERENCE_DISTANCE, SOURCE_REFERENCE_DEFAULT);
+        alSourcef(hsh_src->alSource, AL_ROLLOFF_FACTOR, SOURCE_ROLLOFF_DEFAULT);
+        alSourcei(hsh_src->alSource,AL_LOOPING,AL_FALSE),NULL);
+   
     hsh_src->buffers = (ALuint*) malloc(sizeof(ALuint)*NUM_BUFFERS);
     
-    alAssert(alGenBuffers(NUM_BUFFERS,(hsh_src->buffers)));
-    alAssert(alSourceStop(hsh_src->alSource));
-    printf("source created\n");
+    alAssert(alGenBuffers(NUM_BUFFERS,(hsh_src->buffers)),NULL);
+    alAssert(alSourceStop(hsh_src->alSource),NULL);
+
     return hsh_src;
 }
 
-extern void hsh_freeSource(hsh_aSource* hsh_src){
-    alAssert(alSourcei(hsh_src->alSource,AL_BUFFER,NULL));
-    alAssert(alDeleteBuffers(NUM_BUFFERS,hsh_src->buffers));
-    alAssert(alDeleteSources(1,hsh_src));
+extern int hsh_freeSource(hsh_aSource* hsh_src){
+    alAssert(alSourcei(hsh_src->alSource,AL_BUFFER,NULL),0);
+    alAssert(alDeleteBuffers(NUM_BUFFERS,hsh_src->buffers),0);
+    alAssert(alDeleteSources(1,hsh_src),0);
     free(hsh_src);
+    return 1;
 }
 
 extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* hsh_src,int16_t loops, int32_t mtime){
@@ -42,14 +46,14 @@ extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* hsh_src,int16_t loops
     hsh_src->sample = sample;
 
     Sound_Rewind(hsh_src->sample);
-    alAssert(alSourcei(hsh_src->alSource,AL_BUFFER,NULL));
+    alAssert(alSourcei(hsh_src->alSource,AL_BUFFER,NULL),0);
 
     ALuint i = hsh_bufferMath(hsh_src, hsh_src->buffers,hsh_src->sample, NUM_BUFFERS);
     
-    alAssert(alSourceQueueBuffers(hsh_src->alSource,i,&(hsh_src->buffers[0])));
-    alAssert(alSourcePlay(hsh_src->alSource));
-    printf("sample playing\n");
-    return 0;
+    alAssert(alSourceQueueBuffers(hsh_src->alSource,i,&(hsh_src->buffers[0])),0);
+    alAssert(alSourcePlay(hsh_src->alSource),0);
+
+    return 1;
 }
 
 ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* sample, ALuint n){
@@ -69,12 +73,22 @@ ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* samp
 
         ALvoid* data = calloc(BUFFER_SIZE,1);
 
-        printf("size: %d\n", size);
-
         if(size > (hsh_src->mtime * hush_AI->bpms)){
             memcpy(&data[0],sample->buffer,hsh_src->mtime * hush_AI->bpms);
             hsh_src->mtime = 0;
-            alAssert(alBufferData(buffers[i],AL_FORMAT_MONO16,data,BUFFER_SIZE,sample->actual.rate));
+            if(hush_AI->desired_Format->format == AUDIO_S16){
+                if(hush_AI->desired_Format->channels ==2 ){
+                    alAssert(alBufferData(buffers[i],AL_FORMAT_STEREO16,data,BUFFER_SIZE,sample->actual.rate),-1);
+                }else{
+                    alAssert(alBufferData(buffers[i],AL_FORMAT_MONO16,data,BUFFER_SIZE,sample->actual.rate),-1);
+                }
+            }else{
+                if(hush_AI->desired_Format->channels ==2 ){
+                    alAssert(alBufferData(buffers[i],AL_FORMAT_STEREO8,data,BUFFER_SIZE,sample->actual.rate),-1);
+                }else{
+                    alAssert(alBufferData(buffers[i],AL_FORMAT_MONO8,data,BUFFER_SIZE,sample->actual.rate),-1);
+                }
+        }
             free(data);
             break;
         }
@@ -84,13 +98,10 @@ ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* samp
         memcpy(&data[0],sample->buffer,size);
         if(size < BUFFER_SIZE){
             hsh_src->loops--;
-            printf("loops: %d\n", hsh_src->loops);
             if(hsh_src->loops >= 0){
 
                 Sound_SetBufferSize(sample, BUFFER_SIZE-size);
-                if(Sound_Rewind(sample) == 0){
-                    printf("rewind error\n");
-                }
+
                 Uint32 tsize = Sound_Decode(sample);
                 while (!tsize){
                     Sound_Rewind(sample);
@@ -99,14 +110,24 @@ ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* samp
                 memcpy(&data[size],sample->buffer,tsize);
                 hsh_src->mtime -= tsize / hush_AI->bpms;
                 Sound_SetBufferSize(sample, BUFFER_SIZE);
-                printf("samplesize: %d\n", sample->buffer_size);
             }else if(size == 0){
                 free(data);
                 return i;
             }
         }
-
-        alAssert(alBufferData(buffers[i],AL_FORMAT_MONO16,data,BUFFER_SIZE,sample->actual.rate));
+        if(hush_AI->desired_Format->format == AUDIO_S16){
+            if(hush_AI->desired_Format->channels ==2 ){
+                alAssert(alBufferData(buffers[i],AL_FORMAT_STEREO16,data,BUFFER_SIZE,sample->actual.rate),-1);
+            }else{
+                alAssert(alBufferData(buffers[i],AL_FORMAT_MONO16,data,BUFFER_SIZE,sample->actual.rate),-1);
+            }
+        }else{
+            if(hush_AI->desired_Format->channels ==2 ){
+                alAssert(alBufferData(buffers[i],AL_FORMAT_STEREO8,data,BUFFER_SIZE,sample->actual.rate),-1);
+            }else{
+                alAssert(alBufferData(buffers[i],AL_FORMAT_MONO8,data,BUFFER_SIZE,sample->actual.rate),-1);
+            }
+        }
         free(data);
     }    
 
@@ -120,35 +141,38 @@ extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops
 
 extern int hsh_pauseSource(hsh_aSource* src){
 
-    alAssert(alSourcePause(src->alSource));
+    alAssert(alSourcePause(src->alSource),0);
+    return 1;
 }
 
 extern int hsh_unpauseSource(hsh_aSource* src){
 
-    alAssert(alSourcePlay(src->alSource));
+    alAssert(alSourcePlay(src->alSource),0);
+    return 1;
 }
 
 extern int8_t hsh_feedSource(hsh_aSource* hsh_src){
 
     int i;
     int buffersProcessed = 0;
-    alAssert(alGetSourcei(hsh_src->alSource,AL_BUFFERS_PROCESSED,&buffersProcessed));
+    alAssert(alGetSourcei(hsh_src->alSource,AL_BUFFERS_PROCESSED,&buffersProcessed),-1);
 
     if(buffersProcessed<=0)
         return 0;
 
     while(buffersProcessed--){
         ALuint buf;
-        alAssert(alSourceUnqueueBuffers(hsh_src->alSource, 1, &buf));
+        alAssert(alSourceUnqueueBuffers(hsh_src->alSource, 1, &buf),-1);
         i = hsh_bufferMath(hsh_src, &buf, hsh_src->sample, 1);
-        alAssert(alSourceQueueBuffers(hsh_src->alSource,i,&buf));
+        alAssert(alSourceQueueBuffers(hsh_src->alSource,i,&buf),-1);
     }
 
     return i;
 }
 
 extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos){
-    alAssert(alSource3f(hsh_src->alSource, AL_POSITION, pos.x,pos.y,pos.z));
+    alAssert(alSource3f(hsh_src->alSource, AL_POSITION, pos.x,pos.y,pos.z),0);
+    return 1;
 }
 
 extern int hsh_rotateListener(float pitch,float yaw){
@@ -161,9 +185,9 @@ extern int hsh_rotateListener(float pitch,float yaw){
     yaw   = (yaw) * (M_PI/180);
 
     // FORWARD / AT VECTOR
-    or[0] = (sin(yaw)*cos(pitch));
+    or[0] = sin(yaw) * cos(pitch);
     or[1] = -sin(pitch);
-    or[2] = (cos(yaw) * cos(pitch));
+    or[2] = cos(yaw) * cos(pitch);
 
     //UP VECTOR
 
@@ -172,7 +196,25 @@ extern int hsh_rotateListener(float pitch,float yaw){
     or[5] = cos(yaw) * sin(pitch);
 
 
-    alAssert(alListenerfv(AL_ORIENTATION,or));
+    alAssert(alListenerfv(AL_ORIENTATION,or),0);
+    return 1;
+}
+
+extern int hsh_setListenerPos(hsh_vec3 pos){
+
+    alAssert(alListener3f(AL_POSITION,pos.x,pos.y,pos.z),0);
+    return 1;
+}
+
+extern hsh_vec3* hsh_getListenerPos(void){
+
+    float v[3];
+    alAssert(alGetListenerfv(AL_POSITION,v),NULL);
+    hsh_vec3 *r;
+    r->x = v[0];
+    r->y = v[1];
+    r->z = v[2];
+    return r;
 }
 
 void hsh_initSamplePlayback(Uint16 format,Uint32 rate){ //todo make init variables parameters
@@ -200,7 +242,7 @@ void hsh_initSamplePlayback(Uint16 format,Uint32 rate){ //todo make init variabl
     ALCcontext* c = alcCreateContext(get_AudioDevice(),attrs);
     alcMakeContextCurrent(c);
 
-    printf("playback initialised\n");
+    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
 }
 

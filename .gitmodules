@@ -4,3 +4,6 @@
 [submodule "src/lib/SDL_sound"]
 	path = src/lib/SDL_sound
 	url = git@github.com:icculus/SDL_sound.git
+[submodule "src/lib/tolk"]
+	path = src/lib/tolk
+	url = git@github.com:dkager/tolk.git

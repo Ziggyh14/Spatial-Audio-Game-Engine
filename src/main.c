@@ -204,17 +204,11 @@ int main(){
     SDL_Init(SDL_INIT_AUDIO);
     hsh_initSamplePlayback(AUDIO_S16,44100);
 
-    ALCint attrs[] = {ALC_HRTF_SOFT,ALC_TRUE,0};
-
-    ALCcontext* c = alcCreateContext(get_AudioDevice(),attrs);
-    alcMakeContextCurrent(c);
-
     hsh_vec3 pos = {0,0,0};
     hsh_vec3 player = {0,0,0};
     hsh_vec3 vel = {0,0,0};
-    alListener3f(AL_POSITION,player.x,player.y,player.z);
-    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    printf("x:%f,y:%f,z:%f\n",pos.x,pos.y,pos.z);
+    
+    hsh_setListenerPos(player);
     hsh_aSource* src = hsh_initSource(1.f,1.f,pos,vel);
 
 
@@ -230,7 +224,7 @@ int main(){
     }
     
     hsh_SampleQueue* q = hsh_initQueue();
-    hsh_enqueueSampleFromFile("c.wav",q,src,-1,-1);
+    hsh_enqueueSampleFromFile("101fixed.mp3",q,src,-1,-1);
 
     int i = 100;
 
@@ -248,7 +242,6 @@ int main(){
         SDL_Delay(50);
     }
 
-    alcDestroyContext(c);
     hsh_closeSamplePlayback();
     SDL_Quit();
 
