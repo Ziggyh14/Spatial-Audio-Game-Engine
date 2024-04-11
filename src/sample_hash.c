@@ -45,7 +45,7 @@ void free_Entry(Entry* e){
     return;
 }
 
-Entry* hash_lookup (const char* file){
+Entry* hash_lookup (const char* file,int channels){
 
     if(ht == NULL){
         return NULL;
@@ -100,9 +100,15 @@ Entry* hash_lookup (const char* file){
     Entry* temp = malloc(sizeof(Entry));
     temp->file = file; 
     temp->next = NULL;
-    temp->sample = Sound_NewSampleFromFile(file,get_DesiredAudioInfo(),BUFFER_SIZE);
+    Sound_AudioInfo* ai = get_DesiredAudioInfo();
+    if(channels > 1){
+        ai->channels = 2;
+    }else{
+        ai->channels = 1;
+    }
+    temp->sample = Sound_NewSampleFromFile(file,ai,BUFFER_SIZE);
     if(temp->sample == NULL){
-        printf("Entry not added, ERROR: %s",SDL_GetError());
+        fprintf(stderr, "Entry not added, ERROR: %s",SDL_GetError());
         free(temp);
         return NULL;
     }

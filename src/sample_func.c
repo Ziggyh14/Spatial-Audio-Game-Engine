@@ -77,13 +77,13 @@ ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* samp
             memcpy(&data[0],sample->buffer,hsh_src->mtime * hush_AI->bpms);
             hsh_src->mtime = 0;
             if(hush_AI->desired_Format->format == AUDIO_S16){
-                if(hush_AI->desired_Format->channels ==2 ){
+                if(sample->actual.channels ==2 ){
                     alAssert(alBufferData(buffers[i],AL_FORMAT_STEREO16,data,BUFFER_SIZE,sample->actual.rate),-1);
                 }else{
                     alAssert(alBufferData(buffers[i],AL_FORMAT_MONO16,data,BUFFER_SIZE,sample->actual.rate),-1);
                 }
             }else{
-                if(hush_AI->desired_Format->channels ==2 ){
+                if(sample->actual.channels ==2 ){
                     alAssert(alBufferData(buffers[i],AL_FORMAT_STEREO8,data,BUFFER_SIZE,sample->actual.rate),-1);
                 }else{
                     alAssert(alBufferData(buffers[i],AL_FORMAT_MONO8,data,BUFFER_SIZE,sample->actual.rate),-1);
@@ -134,8 +134,8 @@ ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* samp
     return i;
 }
 
-extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops, int32_t mtime){
-  Entry* e = hash_lookup(file);
+extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops, int32_t mtime,int channels){
+  Entry* e = hash_lookup(file,channels);
   return hsh_playSound(e->sample,src,loops,mtime);
 }
 

@@ -7,3 +7,9 @@
 [submodule "src/lib/tolk"]
 	path = src/lib/tolk
 	url = git@github.com:dkager/tolk.git
+[submodule "lib/SDL_sound"]
+	path = lib/SDL_sound
+	url = git@github.com:icculus/SDL_sound.git
+[submodule "lib/openal-soft"]
+	path = lib/openal-soft
+	url = git@github.com:kcat/openal-soft.git

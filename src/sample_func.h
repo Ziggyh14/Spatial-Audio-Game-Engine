@@ -277,7 +277,7 @@ Hashes filename and returns pointer to entry in hash table
     -Finds and entry is it does already exist.
     -Returns NULL if table hasnt been initialised, is at max capacity, or sample couldnt be loaded
 */
-Entry* hash_lookup (const char* file);
+Entry* hash_lookup (const char* file,int channels);
 
 /*
 Simple Implementation of a djb2 hash function returns hash from given string.
