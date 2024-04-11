@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 
 project(hush VERSION 0.8)
 
+include(GNUInstallDirs)
 
 add_library(hush SHARED
         src/sdl_func.c
@@ -26,10 +27,8 @@ add_subdirectory(lib/openal-soft EXCLUDE_FROM_ALL)
 add_subdirectory(lib/SDL_sound EXCLUDE_FROM_ALL)
 find_package(SDL2 REQUIRED)
 
-include(GNUInstallDirs)
-
 target_link_libraries(hush PUBLIC SDL2::SDL2 SDL2::SDL2main)
-target_link_libraries(hush PUBLIC SDL2_sound::SDL2_sound OpenAL::OpenAL m)
+target_link_libraries(hush PUBLIC SDL2_sound::SDL2_sound OpenAL::OpenAL)
 
 install(TARGETS hush
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
