@@ -50,11 +50,12 @@ extern uint8_t hsh_enqueueSampleFromFile(const char* file,
                                          hsh_SampleQueue* sq, 
                                          hsh_aSource* hsh_src,
                                          int16_t loops,
-                                         int32_t mtime
+                                         int32_t mtime,
+                                         int channels
                                          )
 {
 
-    Entry* e = hash_lookup(file);
+    Entry* e = hash_lookup(file,channels);
     return hsh_enqueueSample(sq, e->sample,hsh_src,loops,mtime);
 }
 

@@ -156,7 +156,7 @@ extern int hsh_playSound(Sound_Sample* sample,hsh_aSource* src,int16_t loops, in
  * 
  *  \sa hsh_playSound
 */
-extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops, int32_t mtime);
+extern int hsh_playSoundFromFile(const char* file,hsh_aSource* src,int16_t loops, int32_t mtime,int channels);
 
 /**
  * pauses playback at source, can be resumed with hsh_unpauseSource
@@ -339,7 +339,8 @@ extern uint8_t hsh_enqueueSampleFromFile(const char* file,
                                          hsh_SampleQueue* sq, 
                                          hsh_aSource* hsh_src,
                                          int16_t loops,
-                                         int32_t mtime);
+                                         int32_t mtime,
+                                         int channels);
 
 extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
 
