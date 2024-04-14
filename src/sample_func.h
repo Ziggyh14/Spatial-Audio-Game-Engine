@@ -219,21 +219,61 @@ extern int hsh_moveSource(hsh_aSource* hsh_src, hsh_vec3 pos);
 */
 extern int hsh_rotateListener(float pitch, float yaw);
 
+/**
+ * moves the listener/player to the given world position.
+ * Takes a vector3 representing x,y,z coordinates.
+ * where x and z represent directions right/left/forward/backwards and y represents up/down
+ * 
+ * \param pos postion to move to Vector3(x,y,z)
+ * 
+ * \return non-zero on sucess, 0 on failure
+*/
 extern int hsh_setListenerPos(hsh_vec3 pos);
 
-extern hsh_vec3* hsh_getListenerPos(void);
+/**
+ * returns the current position the listener/player is located in.
+ * 
+ * \return the position of the listener/player. Will return a vector of {0,0,0}
+ * if somehow a listener is not present.
+*/
+extern hsh_vec3 hsh_getListenerPos(void);
 
-extern void hsh_initSamplePlayback( Uint16 format,Uint32 rate);
+/** 
+ * determines if a source is currently playing audio.
+ * 
+ * \param src audio source to check
+ * \return nonzero if source is playing, 0 if source is not playing or source is not found. 
+*/
+extern int hsh_isSourcePlaying(hsh_aSource* src);
 
+/**
+ * intialises hush engine sample playbakc, must be called before using ANY sample functions
+ * memory should be freed before the end of the program by call hsh_closeSamplePlayback().
+ * This function is called by use hsh_init();
+ * 
+ * \param format audio format to conform all given samples to. Must be either AUDIO_S16 or AUDIO_S8
+ * \param rate audio frequency to conform given samples to.
+ * 
+ * \return non-zero on success, 0 on error
+ * 
+ * \sa hsh_closeSamplePlayback
+*/
+extern int hsh_initSamplePlayback( Uint16 format,Uint32 rate);
+
+/**
+ * closes sample playback and memory created by hsh_initSamplePlayback();
+ * This function is called by hsh_close();
+ * 
+ * \sa hsh_init()
+*/
 extern void hsh_closeSamplePlayback();
-
 
 #endif
 
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#define TABLE_CAPACITY 50
+#define TABLE_CAPACITY 100
 #define BUFFER_SIZE 65536
 
 //Test for a hash table for allocated samples
@@ -252,18 +292,19 @@ typedef struct Table {
 
 } Table;
 
-typedef struct hush_AudioInfo{
+typedef struct hsh_AudioInfo{
 	
 	ALCdevice* device;
 	Sound_AudioInfo* desired_Format;
+    ALCcontext* context;
     int32_t bpms;
 
-} hush_AudioInfo;
+} hsh_AudioInfo;
 
 Sound_AudioInfo* get_DesiredAudioInfo();
 ALCdevice* get_AudioDevice();
 
-hush_AudioInfo *hush_AI;
+hsh_AudioInfo *hush_AI;
 
 Table* create_Table(void);
 

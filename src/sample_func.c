@@ -66,11 +66,6 @@ ALuint hsh_bufferMath(hsh_aSource* hsh_src ,ALuint* buffers , Sound_Sample* samp
             return i;
 
         Uint32 size = Sound_Decode(sample);
-
-        const char* s = Sound_GetError();
-        if (s)
-            printf("%s\n",s);
-
         ALvoid* data = calloc(BUFFER_SIZE,1);
 
         if(size > (hsh_src->mtime * hush_AI->bpms)){
@@ -206,24 +201,48 @@ extern int hsh_setListenerPos(hsh_vec3 pos){
     return 1;
 }
 
-extern hsh_vec3* hsh_getListenerPos(void){
+extern hsh_vec3 hsh_getListenerPos(void){
 
     float v[3];
-    alAssert(alGetListenerfv(AL_POSITION,v),NULL);
-    hsh_vec3 *r;
-    r->x = v[0];
-    r->y = v[1];
-    r->z = v[2];
+    hsh_vec3 r = {0,0,0};
+    alAssert(alGetListenerfv(AL_POSITION,v),r)
+    r.x = v[0];
+    r.y = v[1];
+    r.z = v[2];
     return r;
 }
 
-void hsh_initSamplePlayback(Uint16 format,Uint32 rate){ //todo make init variables parameters
+extern int hsh_isSourcePlaying(hsh_aSource* src){
+    ALuint state;
+    alAssert(alGetSourcei(src->alSource,AL_SOURCE_STATE,&state),0);
+    if(state == AL_PLAYING){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+
+int hsh_initSamplePlayback(Uint16 format,Uint32 rate){ //todo make init variables parameters
     
-    create_Table();
-    Sound_Init();
+    if(!create_Table()){
+        fprintf(stderr,"HUSH INIT ERROR: HASH TABLE FOR SAMPLES WAS NOT CREATED\n");
+        return 0;
+    }
+    if(!Sound_Init()){
+        fprintf(stderr,"HUSH INIT ERROR: SDL_Sound was not initialised\n");
+        return 0;
+    }
     
     ALCdevice* d = alcOpenDevice(NULL);
-    hush_AI = malloc(sizeof(hush_AudioInfo));
+
+    if(!d){
+        fprintf(stderr,"OpenAL device not created, AL ERROR: ");
+        hsh_getALError();
+        return 0;
+    }
+
+    hush_AI = malloc(sizeof(hsh_AudioInfo));
     hush_AI->device = d;
     hush_AI->desired_Format = malloc(sizeof(Sound_AudioInfo));
     hush_AI->desired_Format->channels = 1;
@@ -239,17 +258,36 @@ void hsh_initSamplePlayback(Uint16 format,Uint32 rate){ //todo make init variabl
     }
 
     ALCint attrs[] = {ALC_HRTF_SOFT,ALC_TRUE,0};
-    ALCcontext* c = alcCreateContext(get_AudioDevice(),attrs);
-    alcMakeContextCurrent(c);
+    hush_AI->context = alcCreateContext(get_AudioDevice(),attrs);
+
+    if(hush_AI->context){
+        alcMakeContextCurrent(hush_AI->context);
+    }else{
+        fprintf(stderr,"OpenAL context not created\n, AL ERROR: ");
+        hsh_getALError();
+        return 0;
+    }
 
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+
+    return 1;
 
 }
 
 void hsh_closeSamplePlayback(){
 
     Sound_Quit();
-    alcCloseDevice(get_AudioDevice());
+    if(hush_AI->context)
+        alcDestroyContext(hush_AI->context);
+
+    if(get_AudioDevice())
+        alcCloseDevice(get_AudioDevice());
+
+    if(hush_AI->desired_Format)
+        free(hush_AI->desired_Format);
+
+    free(hush_AI);
+
     delete_Table(); //delete the table
 }
 

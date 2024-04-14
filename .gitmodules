@@ -13,3 +13,6 @@
 [submodule "lib/openal-soft"]
 	path = lib/openal-soft
 	url = git@github.com:kcat/openal-soft.git
+[submodule "lib/tolk"]
+	path = lib/tolk
+	url = git@github.com:dkager/tolk.git
