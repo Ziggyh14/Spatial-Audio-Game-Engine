@@ -91,6 +91,11 @@ int hsh_handleQueue(hsh_SampleQueue* sq){
         return 1;
     }
 
+    if(sq->delayvar > 0){
+        sq->delayvar--;
+        return 0;
+    }
+
     if(sq->head->hsh_src == NULL){
 
         sq->delayvar += sq->head->mtime;
@@ -127,4 +132,6 @@ int hsh_handleQueue(hsh_SampleQueue* sq){
         return hsh_playSound(sq->head->sample,sq->head->hsh_src,sq->head->loops,sq->head->mtime);
         
     }
+
+    return 0;
 }

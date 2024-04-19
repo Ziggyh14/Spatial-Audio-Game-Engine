@@ -7,7 +7,7 @@ Table* create_Table(void){
     ht = (Table*) malloc(sizeof(Table));
 
     if (ht == NULL){
-        printf("ERROR: TABLE NOT CREATED\n");
+        fprintf(stderr,"HUSH ERROR: Memory for sample table cannot be allocated");
         return NULL;
     }
 
@@ -16,7 +16,7 @@ Table* create_Table(void){
     ht->entries = calloc(ht->capacity, sizeof(Entry*));
 
     if (ht->entries == NULL){
-        printf("ERROR: ENTRIES NOT CREATED\n");
+        fprintf(stderr,"HUSH ERROR: Memory for sample table entries couln't be created");
         free(ht->entries);
         return NULL;
     }

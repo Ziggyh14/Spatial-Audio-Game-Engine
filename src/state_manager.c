@@ -1,6 +1,6 @@
 #include "state_manager.h"
 
-StateManager* init_StateManager(int capacity){
+StateManager* hsh_initStateManager(int capacity){
 
     StateManager* sm = (StateManager*) malloc(sizeof(StateManager));
     if(sm == NULL ){
@@ -17,15 +17,15 @@ StateManager* init_StateManager(int capacity){
     }
     return sm;
 }
-void free_StateManager(StateManager* sm){
+void hsh_freeStateManager(StateManager* sm){
     
     while(sm->top >= 0){
-        pop_State(sm);
+        hsh_popState(sm);
     }
     free(sm);
     return;
 }
-unsigned int push_State(State* s, StateManager* sm){
+unsigned int hsh_pushState(State* s, StateManager* sm){
 
     if(sm->top == sm->max){
         printf("State stack at capacity, state cannot be added\n");
@@ -34,10 +34,10 @@ unsigned int push_State(State* s, StateManager* sm){
     
     sm->stack[++(sm->top)] = s;
     printf("state added\n");
-    return (peak_State(sm))->init();
+    return (hsh_peakState(sm))->init();
 
 }
-unsigned int pop_State(StateManager* sm){
+unsigned int hsh_popState(StateManager* sm){
 
     unsigned int r;
     if(sm->top<0){
@@ -49,7 +49,7 @@ unsigned int pop_State(StateManager* sm){
     free(s);
     return r;
 }
-State* peak_State(StateManager* sm){
+State* hsh_peakState(StateManager* sm){
 
     if(sm->top<0){
         printf("nothing in stack cannt peak\n");
@@ -58,7 +58,7 @@ State* peak_State(StateManager* sm){
     return sm->stack[sm->top];
 
 }
-unsigned int update_StateManager(StateManager* sm, unsigned int dT){
+unsigned int hsh_updateStateManager(StateManager* sm, unsigned int dT){
     
     if(sm->top<0){
         printf("State is empty\n");
@@ -66,7 +66,7 @@ unsigned int update_StateManager(StateManager* sm, unsigned int dT){
     }
     return sm->stack[sm->top]->update(dT);
 }
-unsigned int draw_StateManager(StateManager* sm, unsigned int dT){
+unsigned int hsh_drawStateManager(StateManager* sm, unsigned int dT){
     
     if(sm->top<0){
         printf("State is empty\n");

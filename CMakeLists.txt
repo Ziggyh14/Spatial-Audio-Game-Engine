@@ -20,14 +20,10 @@ add_library(hush SHARED
 )
 add_library(hush::hush ALIAS hush)
 
-#set_target_properties(hush PROPERTIES PUBLIC_HEADER src/hush.h)
-#target_include_directories(hush PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-
-
-#add_subdirectory(lib/SDL2 EXCLUDE_FROM_ALL)
 add_subdirectory(lib/openal-soft )
 add_subdirectory(lib/SDL_sound)
 find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
 
 target_include_directories(hush PUBLIC 
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>

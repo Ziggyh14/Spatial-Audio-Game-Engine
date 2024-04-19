@@ -273,10 +273,8 @@ extern void hsh_closeSamplePlayback();
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#define TABLE_CAPACITY 100
 #define BUFFER_SIZE 65536
-
-//Test for a hash table for allocated samples
+#define TABLE_CAPACITY 100
 
 typedef struct Entry {
     const char* file;
@@ -356,20 +354,11 @@ typedef struct hsh_SampleQueue{
 
 /*
 - Initialse a SampleQueue and return a pointer to it
-- samples in the queue are played on thier own channel, meaning other samples can be played without disturbing the queue
 */
 extern hsh_SampleQueue* hsh_initQueue();
 
 extern void hsh_freeQueue(hsh_SampleQueue* sq);
-/*
-push sample to queue, plays after all samples pushed before it.
-- file: file location of the sample
-- mtime: max time a sample will play until it is cut off. 
-- queue to push to (array of string constants)
-sample may end before mtime has elapsed if it (and its loops) are shorter than mtime
-  -1 will let sample play out entirely.
-- returns queue position on sucess, -1 on failure.
-*/
+
 extern uint8_t hsh_enqueueSample(hsh_SampleQueue* sq,
                                  Sound_Sample* sample,
                                  hsh_aSource* hsh_src, 
@@ -383,7 +372,7 @@ extern uint8_t hsh_enqueueSampleFromFile(const char* file,
                                          int32_t mtime,
                                          int channels);
 
-extern int8_t hsh_enqueueDelay(int32_t time, hsh_SampleQueue* sq);
+extern int8_t hsh_enqueueDelay(int32_t ticks, hsh_SampleQueue* sq);
 
 extern uint8_t hsh_dequeueSample(hsh_SampleQueue* sq);
 
