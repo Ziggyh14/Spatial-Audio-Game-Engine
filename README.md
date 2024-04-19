@@ -23,7 +23,7 @@ add_subdirectory(src/hush-engine )
 
 target_link_libraries(out PUBLIC hush::hush)
 ```
-Once added, run `cmake build .` in your project's root directory then nativgate to the created `/build` directory and run `make` to build your executable. Which can be run now with `./build/out`
+Once added, create a directory /build and inside of it run `cmake build ..` then run `make` to build your executable. Which can be run now with `./out`
 
 ## Usage
 Now what hush is linked, you can add
