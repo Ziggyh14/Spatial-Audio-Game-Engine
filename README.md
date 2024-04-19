@@ -11,7 +11,7 @@ First begin by cloning this git respository into your project folder, likley int
 Next, hush has one more required dependency in SDL2. Which can be installed with the command:\
 `sudo apt-get install libsdl2-dev`\
 Now hush is ready to be linked into your project. I'd recommend using CMake to build your executable and manage various dependencies (including hush).\
-Heres an example of a very simple `CMakeLists.txt` file placed at the root of your project that will get you started.\
+Heres an example of a very simple `CMakeLists.txt` file placed at the root of your project that will get you started.
 ```cmake
 project(my_audiogame)
 
@@ -24,3 +24,11 @@ add_subdirectory(src/hush-engine )
 target_link_libraries(out PUBLIC hush::hush)
 ```
 Once added, run `cmake build .` in your project's root directory then nativgate to the created `/build` directory and run `make` to build your executable. Which can be run now with `./build/out`
+
+## Usage
+Now what hush is linked, you can add
+```C
+#include "hush.h"
+```
+To access hush's features. 
+Before doing anything, hush must be initialised using `hush_init()` at the start of your program and closed using `hush_init()` after it is no longer being used.
