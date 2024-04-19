@@ -6,8 +6,8 @@ A spatial-audio game engine designed for the creation of audio only games in C w
 hush uses CMake to provide a library easily linked to your project with **most** inlcuded dependencies. 
 
 ### Unix installation guide:
-First begin by cloning this git respository into your project folder, likley into the `/lib` or `/src` folder\. In order to include the attached git submodules, ensure you use the flag `--recursive-submodules`.\
-`git clone --recursive-submodules "https://github.com/Ziggyh14/hush-engine" `\
+First begin by cloning this git respository into your project folder, likley into the `/lib` or `/src` folder\. In order to include the attached git submodules, ensure you use the flag `--recurse-submodules`.\
+`git clone --recurse-submodules "https://github.com/Ziggyh14/hush-engine" `\
 Next, hush has one more required dependency in SDL2. Which can be installed with the command:\
 `sudo apt-get install libsdl2-dev`\
 Now hush is ready to be linked into your project. I'd recommend using CMake to build your executable and manage various dependencies (including hush).\
