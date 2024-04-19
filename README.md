@@ -31,4 +31,8 @@ Now what hush is linked, you can add
 #include "hush.h"
 ```
 To access hush's features. 
-Before doing anything, hush must be initialised using `hush_init()` at the start of your program and closed using `hush_init()` after it is no longer being used.
+Before doing anything, hush must be initialised using `hush_init()` at the start of your program and closed using `hush_init()` after it is no longer being used.\
+To get started using hush, have a browse of `sample_func.h` which contains the meat of hush's playback features. 
+
+## Beginners Guide
+Coming soon...
